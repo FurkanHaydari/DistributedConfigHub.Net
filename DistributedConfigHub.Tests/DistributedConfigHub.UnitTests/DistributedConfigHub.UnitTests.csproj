@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\DistributedConfigHub.Application\DistributedConfigHub.Application.csproj" />
     <ProjectReference Include="..\..\DistributedConfigHub.Client\DistributedConfigHub.Client.csproj" />
+    <ProjectReference Include="..\..\DistributedConfigHub.Api\DistributedConfigHub.Api.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,6 +8,7 @@ using DistributedConfigHub.Application.Behaviors;
 using DistributedConfigHub.Application.Features.Commands;
 using DistributedConfigHub.Api.Infrastructure.ExceptionHandling;
 using MediatR;
+using DistributedConfigHub.Api.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,9 @@ builder.Services.AddSwaggerGen();
 
 // Configure FluentValidation from Assembly
 builder.Services.AddValidatorsFromAssemblyContaining<CreateConfigurationCommandValidator>();
+
+// Register Custom Action Filters
+builder.Services.AddScoped<ApiKeyAuthorizeAttribute>();
 
 // Configure MediatR
 builder.Services.AddMediatR(cfg => {

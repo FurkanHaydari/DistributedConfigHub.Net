@@ -14,6 +14,9 @@ public class LiveUpdateIntegrationTest : IClassFixture<CustomWebApplicationFacto
         _factory = factory;
         // WebApplicationFactory bizim için tüm sanal altyapıya bağlı bir sahte(Client) oluşturur
         _client = factory.CreateClient();
+        
+        // Testlerin 403 Forbidden alıp patlamaması için yetki sızdırıyoruz (appsettings.json Mock'una göre)
+        _client.DefaultRequestHeaders.Add("X-Api-Key", "ibb-demo-secret-key");
     }
 
     [Fact]

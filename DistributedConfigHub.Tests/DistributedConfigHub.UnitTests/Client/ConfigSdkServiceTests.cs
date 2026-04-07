@@ -23,6 +23,7 @@ public class ConfigSdkServiceTests
             ApiBaseUrl = "http://fake-api",
             ApplicationName = "TEST-APP",
             Environment = "dev",
+            ApiKey = "test-secret-key",
             FallbackFilePath = _fallbackFilePath
         };
         _loggerMock = new Mock<ILogger<ConfigSdkService>>();

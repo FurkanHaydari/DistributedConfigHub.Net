@@ -16,6 +16,9 @@ public class ConfigSdkService : IConfigSdkService
         _httpClient = httpClient;
         _options = options;
         _logger = logger;
+        
+        // Sunucuya atılacak tüm isteklerde Kimlik Anahtarını HTTP Header olarak gönder!
+        _httpClient.DefaultRequestHeaders.Add("X-Api-Key", _options.ApiKey);
     }
 
     public string? GetString(string key) => _cache.TryGetValue(key, out var item) ? item.Value : null;

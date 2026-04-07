@@ -4,6 +4,8 @@ using DistributedConfigHub.Application.Features.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
+using DistributedConfigHub.Api.Filters;
+
 namespace DistributedConfigHub.Api.Controllers;
 
 [ApiController]
@@ -11,11 +13,9 @@ namespace DistributedConfigHub.Api.Controllers;
 public class ConfigurationsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
+    [ServiceFilter(typeof(ApiKeyAuthorizeAttribute))]
     public async Task<ActionResult<IEnumerable<ConfigurationDto>>> GetConfigurations([FromQuery] string applicationName, [FromQuery] string environment)
     {
-        if (string.IsNullOrWhiteSpace(applicationName) || string.IsNullOrWhiteSpace(environment))
-            return BadRequest("applicationName and environment query parameters are required.");
-
         var result = await mediator.Send(new GetConfigurationsQuery(applicationName, environment));
         return Ok(result);
     }

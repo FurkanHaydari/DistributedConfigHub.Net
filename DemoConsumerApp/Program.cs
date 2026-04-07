@@ -6,13 +6,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDistributedConfigHub(options =>
 {
-    options.ApplicationName = "SERVICE-A";
-    options.Environment = "prod";
-    options.ApiBaseUrl = "http://localhost:5173"; // Address of our ConfigHub Api
-    options.FallbackFilePath = "local-fallback-config.json";
-    
-    // RabbitMQ Credentials
-    options.RabbitMqHostName = "localhost";
+    builder.Configuration.GetSection("DistributedConfig").Bind(options);
 });
 
 var app = builder.Build();
