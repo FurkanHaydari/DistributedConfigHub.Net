@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="DemoConsumerApp/DemoConsumerApp.csproj" />
+  <Project Path="DistributedConfigHub.Api/DistributedConfigHub.Api.csproj" />
+  <Project Path="DistributedConfigHub.Application/DistributedConfigHub.Application.csproj" />
+  <Project Path="DistributedConfigHub.Client/DistributedConfigHub.Client.csproj" />
+  <Project Path="DistributedConfigHub.Domain/DistributedConfigHub.Domain.csproj" />
+  <Project Path="DistributedConfigHub.Infrastructure/DistributedConfigHub.Infrastructure.csproj" />
+</Solution>
