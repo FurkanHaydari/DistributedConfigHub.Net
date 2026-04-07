@@ -31,8 +31,7 @@ public class RabbitMqSubscriberHostedService : BackgroundService
             HostName = _options.RabbitMqHostName,
             Port = _options.RabbitMqPort,
             UserName = _options.RabbitMqUserName,
-            Password = _options.RabbitMqPassword,
-            DispatchConsumersAsync = true
+            Password = _options.RabbitMqPassword
         };
 
         try
