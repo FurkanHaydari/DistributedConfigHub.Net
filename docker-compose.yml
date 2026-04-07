@@ -25,5 +25,33 @@ services:
       - "15672:15672" # Tarayıcı Yönetim Ekranı portu
     restart: unless-stopped
 
+  config_api:
+    build:
+      context: .
+      dockerfile: DistributedConfigHub.Api/Dockerfile
+    container_name: confighub-api
+    ports:
+      - "5173:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=ConfigHubDb;Username=postgres;Password=postgres
+      - RabbitMQ__HostName=rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
+    restart: unless-stopped
+
+  demo_consumer:
+    build:
+      context: .
+      dockerfile: DemoConsumerApp/Dockerfile
+    container_name: confighub-demo
+    environment:
+      - DistributedConfig__ApiBaseUrl=http://config_api:8080
+      - DistributedConfig__RabbitMqHostName=rabbitmq
+    depends_on:
+      - config_api
+      - rabbitmq
+    restart: unless-stopped
+
 volumes:
   postgres_data:

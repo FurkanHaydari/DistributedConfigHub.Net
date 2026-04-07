@@ -36,7 +36,30 @@ public class RabbitMqSubscriberHostedService : BackgroundService
 
         try
         {
-            _connection = await factory.CreateConnectionAsync(stoppingToken);
+            // RabbitMQ container'ı Postgres'e göre daha geç ayağa kalktığı için 
+            // "Exponential Backoff" (Kademeli Bekleme) döngüsü kullanıyoruz.
+            int delayMs = 5000;
+            
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    _connection = await factory.CreateConnectionAsync(stoppingToken);
+                    _logger.LogInformation("RabbitMQ bağlantısı başarıyla kuruldu!");
+                    break; // Bağlantı başarılı ise döngüden çık
+                }
+                catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
+                {
+                    _logger.LogWarning("RabbitMQ sunucusuna bağlanılamadı. {Delay} ms sonra tekrar denenecek...", delayMs);
+                    await Task.Delay(delayMs, stoppingToken);
+                    
+                    // Bekleme süresini ikiye katla, ama kalabalık yapmaması için maksimum 60 saniyede bir dene
+                    delayMs = Math.Min(delayMs * 2, 60000); 
+                }
+            }
+
+            if (_connection == null) return;
+
             _channel = await _connection.CreateChannelAsync(options: null, cancellationToken: stoppingToken);
 
             await _channel.ExchangeDeclareAsync(_options.RabbitMqExchangeName, ExchangeType.Direct, durable: true, autoDelete: false, arguments: null, cancellationToken: stoppingToken);
