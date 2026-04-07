@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/DistributedConfigHub.Tests/">
+    <Project Path="DistributedConfigHub.Tests/DistributedConfigHub.IntegrationTests/DistributedConfigHub.IntegrationTests.csproj" />
+    <Project Path="DistributedConfigHub.Tests/DistributedConfigHub.UnitTests/DistributedConfigHub.UnitTests.csproj" />
+  </Folder>
   <Project Path="DemoConsumerApp/DemoConsumerApp.csproj" />
   <Project Path="DistributedConfigHub.Api/DistributedConfigHub.Api.csproj" />
   <Project Path="DistributedConfigHub.Application/DistributedConfigHub.Application.csproj" />
