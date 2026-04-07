@@ -19,11 +19,19 @@ public class ConfigurationRecordConfiguration : IEntityTypeConfiguration<Configu
         
         builder.HasIndex(x => new { x.Name, x.ApplicationName, x.Environment }).IsUnique();
         
-        // Seed Test Data
+        // IBB Seed Data
         builder.HasData(
-            new ConfigurationRecord(Guid.Parse("11111111-1111-1111-1111-111111111111"), "SiteName", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Kadikoy Belediyesi Tech Ekibi", "SERVICE-A", "prod", true),
-            new ConfigurationRecord(Guid.Parse("22222222-2222-2222-2222-222222222222"), "MaxUsers", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "15000", "SERVICE-A", "prod", true),
-            new ConfigurationRecord(Guid.Parse("33333333-3333-3333-3333-333333333333"), "FeatureX_Enabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "true", "SERVICE-A", "prod", true)
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000001"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://dev-odeme.ibb.istanbul", "SERVICE-A", "dev", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000002"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "100", "SERVICE-A", "dev", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000003"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "true", "SERVICE-A", "dev", true),
+
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000004"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://test-odeme.ibb.istanbul", "SERVICE-A", "staging", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000005"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "1000", "SERVICE-A", "staging", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000006"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "staging", true),
+
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000007"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://odeme.ibb.istanbul", "SERVICE-A", "prod", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000008"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "50000", "SERVICE-A", "prod", true),
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000009"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "prod", true)
         );
     }
 }
