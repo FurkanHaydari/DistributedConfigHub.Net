@@ -2,20 +2,26 @@
 
 Modern ve dağıtık mikroservis mimarileri için geliştirilmiş, **merkezi konfigurasyon yönetimi** sağlayan bir .NET 10 sistemidir. Proje; konfigürasyon kayıtlarını merkezi bir veritabanında tutmayı, REST API üzerinden yönetmeyi ve bu konfigürasyonları kullanan servislere uygulamaları yeniden başlatmadan (restart) **canlı (live) güncellemeler** sağlamayı amaçlamaktadır.
 
-## 🚀 Temel Tasarım Kararları (Mimari Yaklaşım)
+## 🚀 Temel Tasarım Kararları ve Gereksinimlerin Karşılanması
 
-### 1. Neden PostgreSQL Tercih Edildi? (Merkezi Storage)
+### 1. Storage Seçimi (Neden PostgreSQL?)
 Proje ödevinin en önemli bileşeni verilerin güvenilir ve tutarlı bir havuzda saklanmasıdır.
-- **Veri Bütünlüğü (Unique Constraints):** `Name`, `ApplicationName` ve `Environment` alanlarının birleşimi üzerinde veritabanı seviyesinde kompozit "Unique Constraint" kuralı işletilmiştir. Uygulamalar JSON vb. şemasız NoSQL sistemlerine kıyasla çok daha öngörülebilir ve ilişkisel bir yapıda tutulur.
-- **Clean Architecture Uyumu:** Entity Framework Core (MediatR CQRS pattern ile harmanlanarak) bağımsız bir Infrastructure katmanında Repository Pattern sınırları dahilinde uygulanmış, gerektiğinde veri tabanını değiştirmenin önü açık bırakılmıştır.
+- **Veri Bütünlüğü (Unique Constraints):** `Name`, `ApplicationName` ve `Environment` alanlarının birleşimi üzerinde veritabanı seviyesinde kompozit "Unique Constraint" kuralı işletilmiştir. Bu nedenle şemasız NoSQL sistemleri (MongoDB vb.) veya in-memory bir geçici heves olan basit Redis kurgusu yerine, asıl gerçeği tutabilecek güvenilir bir ilişkisel veri tabanı yapısı (PostgreSQL) tercih edilmiştir.
+- **Clean Architecture Uyumu:** Entity Framework Core bağımsız bir Infrastructure katmanında Repository Pattern sınırları dahilinde uygulanmış, gerektiğinde veri tabanını (örneğin MSSQL'e) saniyeler içinde değiştirmenin önü açık bırakılmıştır.
 
-### 2. Canlı Güncelleme Mekanizması: RabbitMQ & Yerel Fallback
+### 2. Canlı Güncelleme Mekanizması (Restart Gerektirmeyen Güncelleme)
 Konfigürasyon sistemi asıl gücünü güncellemeleri anlık olarak dağıtabilmesinden alır.
-- **RabbitMQ (Event-Driven Architecture):** 
-Geleneksel Polling (örneğin 5 saniyede bir config değişti mi diye API'ye sorma) yöntemi HTTP trafiği açısından maliyetlidir. API tarafında bir ayar güncellendiği an (CQRS Update Command), anında RabbitMQ `Direct Exchange` yapısına bir uyarı sinyali bırakılır.
-Consumer tarafı (Custom Client SDK), başlatıldığı an silinmeye hazır (Exclusive, AutoDelete) bir kuyrukla arka planda (`BackgroundService`) burayı dinler ve sadece değişiklik olursa REST API'ye istek atıp belleğini (`ConcurrentDictionary`) tazeler.
-- **Dayanıklılık & Fallback (Resilience):**
-Ana Config API'sine ya da RabbitMQ'ya ulaşılamaması bir uygulamanın açılışını engellememelidir. Bu nedenle kütüphane her başarılı veri çekişinde verileri o sunucu içindeki ufak bir `local-fallback-config.json` dosyasına yazarak yedekler. Servis API'ye erişemezse bu "son başarılı veriden" ayağa kalkarak çökmenin önüne geçer.
+- **RabbitMQ (Event-Driven Architecture):** Geleneksel HTTP Polling (sürekli değişti mi diye sorma) yöntemi trafik açısından masraflıdır. API tarafında bir ayar güncellendiği an (CQRS Update Command), anında RabbitMQ `Direct Exchange` yapısına bir uyarı sinyali bırakılır.
+- **Dinamik Bellek:** Consumer projelerin içindeki Custom Client SDK, projeler başlatıldığı an arka planda burayı dinler (`BackgroundService`), sadece bir sinyal gelirse API'ye istek atıp kendi RAM (bellek/cache) durumunu günceller. Dolayısıyla hiçbir uygulama restart gerektirmeden en güncel değeri yaşam döngüsü bitmeden alır.
+
+### 3. Uygulama İzolasyonu
+Her servis kesinlikle yalnızca kendine tanımlanmış uzaya erişebilmelidir.
+- Client SDK başlatılırken `ApplicationName` ("SERVICE-A") ve `Environment` belirtmek zorundadır. Bu değişkenler hem HTTP REST API'ye yapılan konfigurasyon çekme isteklerinde (`GET ?applicationName=SERVICE-A`) filtre olarak kullanılır hem de RabbitMQ kuyruğuna dinleyici eklenirken `RoutingKey` olarak sadece belirtilen o uygulamanın sinyali ("SERVICE-A") ile eşleştirilerek diğer servisin verileriyle yalıtılır.
+
+### 4. Bağlantı Problemi (Maksimum Dayanıklılık & Resilience)
+Ana Config API'sine ya da RabbitMQ'ya ulaşılamaması bir uygulamanın ayağa kalkmasını engellememelidir.
+- Bu senaryo için SDK içerisine bir **Fallback Strategy** (Geri Çekilme Senaryosu) uygulanmıştır. Kütüphane her başarılı konfigürasyon çekişinde, değerleri servisin kendi diski içerisinde yer alan `local-fallback-config.json` isminde minik bir yedek dosyaya yazar. Servis API'ye erişemez veya Timeout'a düşerse (HTTP 500/503), bu dosyadaki "en son bilinen iyi değerlerden" programını çalıştırmaya hiçbir şey olmamışçasına devam eder.
+- Bu esneklik testlerle de kanıtlanmıştır.
 
 ---
 
