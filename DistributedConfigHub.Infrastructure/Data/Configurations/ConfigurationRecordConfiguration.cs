@@ -18,5 +18,12 @@ public class ConfigurationRecordConfiguration : IEntityTypeConfiguration<Configu
         builder.Property(x => x.IsActive).IsRequired();
         
         builder.HasIndex(x => new { x.Name, x.ApplicationName, x.Environment }).IsUnique();
+        
+        // Seed Test Data
+        builder.HasData(
+            new ConfigurationRecord(Guid.Parse("11111111-1111-1111-1111-111111111111"), "SiteName", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Kadikoy Belediyesi Tech Ekibi", "SERVICE-A", "prod", true),
+            new ConfigurationRecord(Guid.Parse("22222222-2222-2222-2222-222222222222"), "MaxUsers", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "15000", "SERVICE-A", "prod", true),
+            new ConfigurationRecord(Guid.Parse("33333333-3333-3333-3333-333333333333"), "FeatureX_Enabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "true", "SERVICE-A", "prod", true)
+        );
     }
 }
