@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 using DistributedConfigHub.Infrastructure.Data;
 using Xunit;
+using Microsoft.AspNetCore.TestHost;
 
 namespace DistributedConfigHub.IntegrationTests;
 
@@ -33,11 +35,26 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureTestServices(services =>
+        {
+            // Orijinal (Program.cs içerisindeki) veritabanı ayarını siliyoruz ki dışarıya sızmasın
+            services.RemoveAll<DbContextOptions<ConfigDbContext>>();
+
+            // Testcontainer üzerinden izole çalışacak tertemiz DB ayarı
+            services.AddDbContext<ConfigDbContext>(options =>
+                options.UseNpgsql(_dbContainer.GetConnectionString()));
+
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
+            // Migration ve tohumlu veriler sadece bu container DB üzerinden döner.
+            db.Database.Migrate();
+        });
+
         builder.ConfigureAppConfiguration((context, config) =>
         {
             var confDict = new Dictionary<string, string>
             {
-                { "ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString() },
                 { "RabbitMQ:HostName", _rabbitMqContainer.Hostname },
                 { "RabbitMQ:Port", _rabbitMqContainer.GetMappedPublicPort(5672).ToString() },
                 { "RabbitMQ:UserName", "guest" },
@@ -45,27 +62,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             };
             config.AddInMemoryCollection(confDict!);
         });
-
-        builder.ConfigureServices(services =>
-        {
-            // Veritabanının güncel olduğundan emin olalım (Migration seed dataları ile dolar)
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
-            db.Database.Migrate();
-        });
     }
 
     public async Task InitializeAsync()
     {
-        // Container imajlarını indirip sanal ortamı test için ayağa kaldırır
         await _dbContainer.StartAsync();
         await _rabbitMqContainer.StartAsync();
     }
 
     public new async Task DisposeAsync()
     {
-        // Testler bittiğinde ortamı temizler, çöp bırakmaz
         await _dbContainer.DisposeAsync();
         await _rabbitMqContainer.DisposeAsync();
     }
