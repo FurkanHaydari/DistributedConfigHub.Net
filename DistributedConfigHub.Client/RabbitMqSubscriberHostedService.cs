@@ -78,10 +78,8 @@ public class RabbitMqSubscriberHostedService : BackgroundService
                 _logger.LogInformation("Received live update event from config hub: {Message}. Reloading configs...", message);
                 await _configSdkService.ReloadConfigurationsAsync(stoppingToken);
 
-                // Kullanıcının (İBB Müşterisi) isteği: Değer güncellendiğinde en güncel değerleri logla!
-                var newPaymentGw = _configSdkService.GetString("PaymentGatewayUrl");
-                var newLimit = _configSdkService.GetInt("MaxIstanbulKartTransactionsPerMin");
-                _logger.LogInformation($"[EVENT BAŞARILI] Bellek güncellendi. Yeni Değerler -> Gateway: {newPaymentGw}, Limit: {newLimit}");
+                // Kullanıcı tarafından tanımlanan callback'i çağır (varsa)
+                _options.OnConfigurationUpdated?.Invoke(_configSdkService);
             };
 
             await _channel.BasicConsumeAsync(queue: _queueName, autoAck: true, consumer: consumer, cancellationToken: stoppingToken);

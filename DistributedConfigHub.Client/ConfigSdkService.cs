@@ -6,7 +6,8 @@ namespace DistributedConfigHub.Client;
 
 public class ConfigSdkService : IConfigSdkService
 {
-    private readonly ConcurrentDictionary<string, ConfigurationItem> _cache = new();
+    // volatile: Referans değişimi anında tüm thread'ler tarafından görülür (atomic swap)
+    private volatile ConcurrentDictionary<string, ConfigurationItem> _cache = new();
     private readonly HttpClient _httpClient;
     private readonly DistributedConfigOptions _options;
     private readonly ILogger<ConfigSdkService> _logger;
@@ -58,11 +59,7 @@ public class ConfigSdkService : IConfigSdkService
                 
                 if (items is not null)
                 {
-                    _cache.Clear();
-                    foreach (var item in items)
-                    {
-                        _cache[item.Name] = item;
-                    }
+                    SwapCache(items);
                     
                     await File.WriteAllTextAsync(_options.FallbackFilePath, content, cancellationToken);
                     _logger.LogInformation("Configurations successfully loaded from API and cached to {FallbackFile}.", _options.FallbackFilePath);
@@ -89,11 +86,7 @@ public class ConfigSdkService : IConfigSdkService
             
             if (items is not null)
             {
-                _cache.Clear();
-                foreach (var item in items)
-                {
-                    _cache[item.Name] = item;
-                }
+                SwapCache(items);
                 _logger.LogInformation("Configurations loaded from local fallback file.");
             }
         }
@@ -101,5 +94,19 @@ public class ConfigSdkService : IConfigSdkService
         {
             _logger.LogWarning("Local fallback file not found at {FallbackFile}. The configuration cache remains empty.", _options.FallbackFilePath);
         }
+    }
+
+    /// <summary>
+    /// Yeni bir dictionary oluşturup referansı atomik olarak değiştirir.
+    /// Bu sayede okuyucu thread'ler asla boş veya yarım yüklenmiş bir cache görmez.
+    /// </summary>
+    private void SwapCache(List<ConfigurationItem> items)
+    {
+        var newCache = new ConcurrentDictionary<string, ConfigurationItem>();
+        foreach (var item in items)
+        {
+            newCache[item.Name] = item;
+        }
+        _cache = newCache; // Atomic reference swap (volatile)
     }
 }
