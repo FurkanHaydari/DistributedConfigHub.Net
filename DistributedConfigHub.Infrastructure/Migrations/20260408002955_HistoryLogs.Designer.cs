@@ -3,6 +3,7 @@ using System;
 using DistributedConfigHub.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedConfigHub.Infrastructure.Migrations
 {
     [DbContext(typeof(ConfigDbContext))]
-    partial class ConfigDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408002955_HistoryLogs")]
+    partial class HistoryLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +49,6 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("OldValues")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Reason")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("Timestamp")
@@ -124,7 +124,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3100), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "dev",
                             IsActive = true,
                             Name = "PaymentGatewayUrl",
@@ -135,7 +135,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "dev",
                             IsActive = true,
                             Name = "MaxIstanbulKartTransactionsPerMin",
@@ -146,7 +146,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "dev",
                             IsActive = true,
                             Name = "IsMaintenanceModeEnabled",
@@ -157,7 +157,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "staging",
                             IsActive = true,
                             Name = "PaymentGatewayUrl",
@@ -168,7 +168,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "staging",
                             IsActive = true,
                             Name = "MaxIstanbulKartTransactionsPerMin",
@@ -179,7 +179,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "staging",
                             IsActive = true,
                             Name = "IsMaintenanceModeEnabled",
@@ -190,7 +190,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "prod",
                             IsActive = true,
                             Name = "PaymentGatewayUrl",
@@ -201,7 +201,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "prod",
                             IsActive = true,
                             Name = "MaxIstanbulKartTransactionsPerMin",
@@ -212,7 +212,7 @@ namespace DistributedConfigHub.Infrastructure.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
                             ApplicationName = "SERVICE-A",
-                            CreatedAt = new DateTimeOffset(new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 4, 8, 0, 29, 55, 349, DateTimeKind.Unspecified).AddTicks(3110), new TimeSpan(0, 0, 0, 0, 0)),
                             Environment = "prod",
                             IsActive = true,
                             Name = "IsMaintenanceModeEnabled",

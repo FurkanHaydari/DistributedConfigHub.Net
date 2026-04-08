@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 using DistributedConfigHub.Infrastructure.Data;
+using DistributedConfigHub.Infrastructure.Data.Interceptors;
 using Xunit;
 using Microsoft.AspNetCore.TestHost;
 
@@ -16,6 +17,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 {
     private readonly PostgreSqlContainer _dbContainer;
     private readonly RabbitMqContainer _rabbitMqContainer;
+
+    public System.Text.Json.JsonSerializerOptions DefaultJsonOptions { get; } = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+    };
 
     public CustomWebApplicationFactory()
     {
@@ -41,8 +48,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             services.RemoveAll<DbContextOptions<ConfigDbContext>>();
 
             // Testcontainer üzerinden izole çalışacak tertemiz DB ayarı
-            services.AddDbContext<ConfigDbContext>(options =>
-                options.UseNpgsql(_dbContainer.GetConnectionString()));
+            services.AddSingleton<AuditInterceptor>();
+            services.AddDbContext<ConfigDbContext>((sp, options) =>
+            {
+                options.UseNpgsql(_dbContainer.GetConnectionString());
+                options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
+            });
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();

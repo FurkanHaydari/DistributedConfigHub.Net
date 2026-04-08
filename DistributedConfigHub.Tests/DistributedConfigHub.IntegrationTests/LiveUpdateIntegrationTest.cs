@@ -25,7 +25,8 @@ public class LiveUpdateIntegrationTest : IClassFixture<CustomWebApplicationFacto
         // 1. Orijinal IBB ayarlarını "Prod" ortamı için çek
         var getResponse = await _client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
         getResponse.EnsureSuccessStatusCode();
-        var configs = await getResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>();
+
+        var configs = await getResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(_factory.DefaultJsonOptions);
         
         Assert.NotNull(configs);
         Assert.NotEmpty(configs); // Migration seed datasının başarıyla geldiğini doğrular
@@ -47,7 +48,7 @@ public class LiveUpdateIntegrationTest : IClassFixture<CustomWebApplicationFacto
 
         // 3. Gerçekten güncellenmiş mi diye tekrar Testcontainer DB'den taze çek
         var getUpdatedResponse = await _client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
-        var updatedConfigs = await getUpdatedResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>();
+        var updatedConfigs = await getUpdatedResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(_factory.DefaultJsonOptions);
         
         var updatedKartLimitConfig = updatedConfigs!.First(c => c.Name == "MaxIstanbulKartTransactionsPerMin");
         

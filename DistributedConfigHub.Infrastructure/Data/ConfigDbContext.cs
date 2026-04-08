@@ -6,6 +6,7 @@ namespace DistributedConfigHub.Infrastructure.Data;
 public class ConfigDbContext(DbContextOptions<ConfigDbContext> options) : DbContext(options)
 {
     public DbSet<ConfigurationRecord> Configurations { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

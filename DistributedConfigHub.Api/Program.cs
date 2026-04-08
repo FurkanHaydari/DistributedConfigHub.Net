@@ -41,12 +41,19 @@ builder.Services.AddMediatR(cfg => {
 // Configure Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? "Host=localhost;Database=ConfigHubDb;Username=postgres;Password=postgres";
-                       
-builder.Services.AddDbContext<ConfigDbContext>(options =>
-    options.UseNpgsql(connectionString));
+
+builder.Services.AddSingleton<IAuditContextAccessor, DistributedConfigHub.Infrastructure.Data.Interceptors.AuditContextAccessor>();                       
+builder.Services.AddSingleton<DistributedConfigHub.Infrastructure.Data.Interceptors.AuditInterceptor>();
+
+builder.Services.AddDbContext<ConfigDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<DistributedConfigHub.Infrastructure.Data.Interceptors.AuditInterceptor>());
+});
 
 // Configure Infrastructure Dependencies
 builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+builder.Services.AddScoped<IAuditLogRepository, DistributedConfigHub.Infrastructure.Data.Repositories.AuditLogRepository>();
 // RabbitMqPublisher is stateless, Singleton is perfectly fine here
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 

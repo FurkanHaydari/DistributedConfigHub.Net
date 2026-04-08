@@ -2,7 +2,7 @@ using DistributedConfigHub.Domain.Enums;
 
 namespace DistributedConfigHub.Domain.Entities;
 
-public class ConfigurationRecord(Guid id, string name, ConfigurationType type, string value, string applicationName, string environment, bool isActive)
+public class ConfigurationRecord(Guid id, string name, ConfigurationType type, string value, string applicationName, string environment, bool isActive) : BaseAuditableEntity
 {
     public Guid Id { get; private set; } = id;
     public string Name { get; private set; } = name;

@@ -54,4 +54,20 @@ public class ConfigurationsController(IMediator mediator) : ControllerBase
         
         return NoContent();
     }
+
+    [HttpGet("{id:guid}/history")]
+    public async Task<IActionResult> GetHistory(Guid id)
+    {
+        var history = await mediator.Send(new GetConfigurationHistoryQuery(id));
+        return Ok(history);
+    }
+
+    [HttpPost("{id:guid}/rollback/{auditLogId:guid}")]
+    public async Task<IActionResult> Rollback(Guid id, Guid auditLogId)
+    {
+        var success = await mediator.Send(new RollbackConfigurationCommand(id, auditLogId));
+        if (!success) return BadRequest("Rollback failed. Either the configuration or the specified history log does not exist.");
+        
+        return Ok("Successfully rolled back the configuration.");
+    }
 }
