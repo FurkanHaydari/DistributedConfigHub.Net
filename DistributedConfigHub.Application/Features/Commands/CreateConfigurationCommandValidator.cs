@@ -11,7 +11,7 @@ public class CreateConfigurationCommandValidator : AbstractValidator<CreateConfi
             .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
 
         RuleFor(x => x.Type)
-            .IsInEnum().WithMessage("Type must be a valid ConfigurationType (0 = Int, 1 = String, 2 = Boolean, 3 = Double).");
+            .IsInEnum().WithMessage("Type must be a valid ConfigurationType (0 = String, 1 = Int, 2 = Double, 3 = Boolean).");
 
         RuleFor(x => x.Value)
             .NotEmpty().WithMessage("Value is required.")
