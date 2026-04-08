@@ -13,7 +13,6 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private IConnection? _connection;
     private IChannel? _channel;
-    private bool _exchangeDeclared;
 
     public RabbitMqPublisher(IConfiguration configuration, ILogger<RabbitMqPublisher> logger)
     {

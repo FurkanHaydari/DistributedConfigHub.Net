@@ -59,17 +59,25 @@ builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
 var app = builder.Build();
 
+// Veritabanı tablolarını ve seed data'yı oluştur (ilk çalıştırmada)
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
+    dbContext.Database.EnsureCreated();
+}
+
 // Activate modern Exception Handlers
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger her ortamda açık (demo ve sunum kolaylığı için)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+// Admin Panel için statik dosya sunumu (wwwroot/index.html)
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

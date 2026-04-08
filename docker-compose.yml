@@ -10,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
   rabbitmq:
@@ -21,6 +26,11 @@ services:
     ports:
       - "5672:5672"   # Uygulama bağlantı portu
       - "15672:15672" # Tarayıcı Yönetim Ekranı portu
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   config_api:
@@ -31,11 +41,14 @@ services:
     ports:
       - "5173:8080"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=ConfigHubDb;Username=postgres;Password=postgres
       - RabbitMQ__HostName=rabbitmq
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   demo_consumer:
@@ -47,8 +60,10 @@ services:
       - DistributedConfig__ApiBaseUrl=http://config_api:8080
       - DistributedConfig__RabbitMqHostName=rabbitmq
     depends_on:
-      - config_api
-      - rabbitmq
+      config_api:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
