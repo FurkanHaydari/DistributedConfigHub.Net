@@ -81,18 +81,52 @@ public class ApiKeyAuthorizeAttributeTests
     }
 
     [Fact]
-    public async Task OnActionExecutionAsync_WhenApplicationNameMissing_ShouldReturn400BadRequest()
+    public async Task OnActionExecutionAsync_WhenApplicationNameMissing_AndInvalidKey_ShouldReturn401Unauthorized()
     {
-        // Arrange
-        var context = CreateMockContext(apiKeyHeader: "some-key", applicationNameQuery: null);
+        // Arrange — applicationName yok, geçersiz key → Temel doğrulama modu devreye girer
+        var context = CreateMockContext(apiKeyHeader: "invalid-key", applicationNameQuery: null);
+        
+        // Mock: ApiKeys section'da hiçbir child key eşleşmesin
+        var emptySection = new Mock<IConfigurationSection>();
+        _configurationMock.Setup(x => x.GetSection("ApiKeys"))
+            .Returns(emptySection.Object);
+        emptySection.Setup(x => x.GetChildren())
+            .Returns(Array.Empty<IConfigurationSection>());
+        
         var nextMock = new Mock<ActionExecutionDelegate>();
 
         // Act
         await _filter.OnActionExecutionAsync(context, nextMock.Object);
 
         // Assert
-        context.Result.Should().BeOfType<BadRequestObjectResult>();
+        context.Result.Should().BeOfType<UnauthorizedObjectResult>();
         nextMock.Verify(x => x(), Times.Never);
+    }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_WhenApplicationNameMissing_AndValidKey_ShouldProceed()
+    {
+        // Arrange — applicationName yok ama geçerli key → Mutation endpoint'leri (POST/PUT/DELETE) için yeterli
+        var context = CreateMockContext(apiKeyHeader: "real-secret-key", applicationNameQuery: null);
+        
+        // Mock: ApiKeys section'da eşleşen bir key var
+        var childSection = new Mock<IConfigurationSection>();
+        childSection.Setup(x => x.Value).Returns("real-secret-key");
+        
+        var apiKeysSection = new Mock<IConfigurationSection>();
+        apiKeysSection.Setup(x => x.GetChildren())
+            .Returns(new[] { childSection.Object });
+        _configurationMock.Setup(x => x.GetSection("ApiKeys"))
+            .Returns(apiKeysSection.Object);
+        
+        var nextMock = new Mock<ActionExecutionDelegate>();
+
+        // Act
+        await _filter.OnActionExecutionAsync(context, nextMock.Object);
+
+        // Assert
+        context.Result.Should().BeNull(); // Engellenmemeli
+        nextMock.Verify(x => x(), Times.Once); // Handler çalışmalı
     }
 
     [Fact]

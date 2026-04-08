@@ -10,10 +10,10 @@ namespace DistributedConfigHub.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[ServiceFilter(typeof(ApiKeyAuthorizeAttribute))]
 public class ConfigurationsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    [ServiceFilter(typeof(ApiKeyAuthorizeAttribute))]
     public async Task<ActionResult<IEnumerable<ConfigurationDto>>> GetConfigurations([FromQuery] string applicationName, [FromQuery] string environment)
     {
         var result = await mediator.Send(new GetConfigurationsQuery(applicationName, environment));
