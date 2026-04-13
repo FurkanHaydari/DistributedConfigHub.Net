@@ -13,7 +13,6 @@ using DistributedConfigHub.Api.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Exception Handlers (Modern approach replacing use-exception-handler middlewares)
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
