@@ -25,4 +25,11 @@ public class ConfigurationRecord(Guid id, string name, ConfigurationType type, s
         UpdatedBy = "admin";
         UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    public void Activate()
+    {
+        IsActive = true;
+        UpdatedBy = "admin";
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
 }

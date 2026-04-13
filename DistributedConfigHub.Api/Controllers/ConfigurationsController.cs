@@ -14,9 +14,16 @@ namespace DistributedConfigHub.Api.Controllers;
 public class ConfigurationsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ConfigurationDto>>> GetConfigurations([FromQuery] string applicationName, [FromQuery] string environment)
+    public async Task<ActionResult<IEnumerable<ConfigurationDto>>> GetConfigurations([FromQuery] string applicationName, [FromQuery] string? environment = null)
     {
         var result = await mediator.Send(new GetConfigurationsQuery(applicationName, environment));
+        return Ok(result);
+    }
+
+    [HttpGet("deleted")]
+    public async Task<ActionResult<IEnumerable<ConfigurationDto>>> GetDeletedConfigurations([FromQuery] string applicationName, [FromQuery] string? environment = null)
+    {
+        var result = await mediator.Send(new GetDeletedConfigurationsQuery(applicationName, environment));
         return Ok(result);
     }
 

@@ -8,8 +8,5 @@ public class GetConfigurationsQueryValidator : AbstractValidator<GetConfiguratio
     {
         RuleFor(x => x.ApplicationName)
             .NotEmpty().WithMessage("ApplicationName query parameter is required.");
-
-        RuleFor(x => x.Environment)
-            .NotEmpty().WithMessage("Environment query parameter is required.");
     }
 }

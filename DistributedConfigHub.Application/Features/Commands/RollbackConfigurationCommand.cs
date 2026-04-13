@@ -20,21 +20,34 @@ public class RollbackConfigurationCommandHandler(IConfigurationRepository reposi
         if (string.IsNullOrEmpty(auditLog.OldValues)) return false;
 
         var jsonDoc = JsonDocument.Parse(auditLog.OldValues);
+        bool hasChanges = false;
+
         if (jsonDoc.RootElement.TryGetProperty("Value", out var valueElement))
         {
             var oldStringValue = valueElement.GetString();
             if (oldStringValue != null)
             {
                 record.UpdateValue(oldStringValue);
-                
-                // Infrastructure katmanına context aktarımı
-                auditContextAccessor.SetContext("ROLLBACK", $"Reverted from Audit Log ID: {request.AuditLogId}");
-                
-                await repository.UpdateAsync(record, cancellationToken);
-
-                await messagePublisher.PublishConfigurationUpdatedEventAsync(record.ApplicationName, record.Environment, cancellationToken);
-                return true;
+                hasChanges = true;
             }
+        }
+
+        if (jsonDoc.RootElement.TryGetProperty("IsActive", out var activeElement))
+        {
+            var oldActiveValue = activeElement.GetBoolean();
+            if (oldActiveValue) record.Activate(); else record.Deactivate();
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            // Infrastructure katmanına context aktarımı
+            auditContextAccessor.SetContext("ROLLBACK", $"Reverted from Audit Log ID: {request.AuditLogId}");
+            
+            await repository.UpdateAsync(record, cancellationToken);
+
+            await messagePublisher.PublishConfigurationUpdatedEventAsync(record.ApplicationName, record.Environment, cancellationToken);
+            return true;
         }
 
         return false;

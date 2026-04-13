@@ -4,7 +4,8 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Queries;
 
-public record GetConfigurationsQuery(string ApplicationName, string Environment) : IRequest<IEnumerable<ConfigurationDto>>;
+public record GetConfigurationsQuery(string ApplicationName, string? Environment) : IRequest<IEnumerable<ConfigurationDto>>;
+
 
 public class GetConfigurationsQueryHandler(IConfigurationRepository repository) : IRequestHandler<GetConfigurationsQuery, IEnumerable<ConfigurationDto>>
 {

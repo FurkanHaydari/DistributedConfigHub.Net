@@ -259,6 +259,42 @@
             background: var(--bg-card-hover);
         }
 
+        .btn-refresh {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-left: 14px !important;
+            padding-right: 16px !important;
+        }
+
+        .btn-refresh svg {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.8;
+        }
+
+        .btn-refresh:hover svg {
+            transform: rotate(180deg);
+            opacity: 1;
+        }
+
+        .btn-refresh {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-left: 14px !important;
+            padding-right: 16px !important;
+        }
+
+        .btn-refresh svg {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.8;
+        }
+
+        .btn-refresh:hover svg {
+            transform: rotate(180deg);
+            opacity: 1;
+        }
+
         .btn-danger {
             background: var(--danger-bg);
             color: var(--danger);
@@ -599,11 +635,15 @@
                     <option value="SERVICE-B">SERVICE-B</option>
                 </select>
                 <select id="filterEnv" onchange="loadConfigurations()">
+                    <option value="" selected>Tümü</option>
                     <option value="dev">dev</option>
                     <option value="staging">staging</option>
-                    <option value="prod" selected>prod</option>
+                    <option value="prod">prod</option>
                 </select>
-                <button class="btn btn-secondary" onclick="loadConfigurations()">🔄 Yenile</button>
+                <button class="btn btn-secondary btn-refresh" onclick="loadConfigurations()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                    Yenile
+                </button>
             </div>
             <button class="btn btn-primary" onclick="openCreateModal()">+ Yeni Konfigürasyon</button>
         </div>
@@ -631,10 +671,43 @@
             </table>
         </div>
 
+        <!-- Deleted Configurations -->
+        <div id="deletedConfigSection"
+            style="margin-top: 48px; border-top: 1px dashed var(--border); padding-top: 24px; display: none;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--danger);"></div>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-secondary);">Silinmiş Konfigürasyonlar
+                    (Inactive)</h3>
+            </div>
+            <div class="table-container" style="opacity: 0.7; filter: grayscale(0.4);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ad</th>
+                            <th>Tip</th>
+                            <th>Değer</th>
+                            <th>Ortam</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deletedConfigTable">
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <div class="icon">🗑️</div>Görünecek silinmiş konfigürasyon yok.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- History Panel (shown below table on demand) -->
         <div id="historyPanel" style="display:none; margin-top: 24px;">
-            <h3 style="margin-bottom: 12px; font-size: 15px;">📜 Değişiklik Geçmişi — <span id="historyTitle"></span>
-            </h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 15px;">📜 Değişiklik Geçmişi — <span id="historyTitle" style="color: var(--accent);"></span></h3>
+                <button class="btn btn-secondary btn-sm" onclick="closeHistory()">Kapat ✕</button>
+            </div>
             <div id="historyList" class="history-panel"></div>
         </div>
     </div>
@@ -704,6 +777,28 @@
             setTimeout(() => el.remove(), 4000);
         }
 
+        // Format Audit JSON for cleaner display
+        function formatAuditValues(jsonStr) {
+            if (!jsonStr) return '<span style="color:var(--text-muted)">—</span>';
+            try {
+                const data = JSON.parse(jsonStr);
+                const keys = Object.keys(data).filter(k =>
+                    !['Id', 'EntityId', 'CreatedAt', 'UpdatedAt', 'CreatedBy', 'UpdatedBy'].includes(k)
+                );
+
+                if (keys.length === 0) return '<span style="color:var(--text-muted)">Değişiklik yok (metadata)</span>';
+
+                return keys.map(k => `
+                    <span style="font-size: 11px; margin-right: 8px;">
+                        <span style="color: var(--text-secondary); font-weight: 600;">${k}:</span> 
+                        <code style="background: var(--bg-card); color: var(--accent); padding: 2px 4px; border-radius: 4px;">${data[k]}</code>
+                    </span>
+                `).join('');
+            } catch (e) {
+                return `<code style="font-size:11px;">${jsonStr}</code>`;
+            }
+        }
+
         // Health Check
         async function checkHealth() {
             try {
@@ -751,7 +846,10 @@
             const app = document.getElementById('filterApp').value;
             const env = document.getElementById('filterEnv').value;
             const table = document.getElementById('configTable');
+            const deletedTable = document.getElementById('deletedConfigTable');
+            const deletedSection = document.getElementById('deletedConfigSection');
 
+            // Load Active
             try {
                 const res = await fetch(`${API_BASE}/Configurations?applicationName=${app}&environment=${env}`, { headers: headers() });
 
@@ -762,11 +860,35 @@
 
                 configs = await res.json();
                 if (!configs.length) {
-                    table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">📋</div>Bu filtre için konfigürasyon bulunamadı.</td></tr>`;
-                    return;
+                    table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">📋</div>Bu filtre için aktif konfigürasyon bulunamadı.</td></tr>`;
+                } else {
+                    table.innerHTML = configs.map(c => renderConfigRow(c)).join('');
                 }
+            } catch (e) {
+                table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">⚠️</div>API'ye erişilemedi: ${e.message}</td></tr>`;
+            }
 
-                table.innerHTML = configs.map(c => `
+            // Load Deleted
+            try {
+                const resDeleted = await fetch(`${API_BASE}/Configurations/deleted?applicationName=${app}&environment=${env}`, { headers: headers() });
+                if (resDeleted.ok) {
+                    const deletedConfigs = await resDeleted.json();
+                    if (deletedConfigs.length > 0) {
+                        deletedSection.style.display = 'block';
+                        deletedConfigTable.innerHTML = deletedConfigs.map(c => renderConfigRow(c, true)).join('');
+                        // Merge deleted onto global configs for modal lookups if needed
+                        configs = [...configs, ...deletedConfigs];
+                    } else {
+                        deletedSection.style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error('Deleted configs fetch error:', e);
+            }
+        }
+
+        function renderConfigRow(c, isDeleted = false) {
+            return `
                 <tr>
                     <td><strong>${c.name}</strong></td>
                     <td><span class="badge badge-type">${c.type}</span></td>
@@ -774,15 +896,12 @@
                     <td><span class="badge badge-env">${c.environment}</span></td>
                     <td><span class="badge ${c.isActive ? 'badge-active' : 'badge-inactive'}">${c.isActive ? 'Aktif' : 'Pasif'}</span></td>
                     <td class="actions">
-                        <button class="btn btn-secondary btn-sm" onclick="openEditModal('${c.id}')">✏️</button>
+                        ${!isDeleted ? `<button class="btn btn-secondary btn-sm" onclick="openEditModal('${c.id}')">✏️</button>` : ''}
                         <button class="btn btn-secondary btn-sm" onclick="showHistory('${c.id}', '${c.name}')">📜</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteConfig('${c.id}')">🗑</button>
+                        ${!isDeleted ? `<button class="btn btn-danger btn-sm" onclick="deleteConfig('${c.id}')">🗑</button>` : ''}
                     </td>
                 </tr>
-            `).join('');
-            } catch (e) {
-                table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">⚠️</div>API'ye erişilemedi: ${e.message}</td></tr>`;
-            }
+            `;
         }
 
         // Create / Edit Modal
@@ -904,9 +1023,8 @@
                 }
 
                 list.innerHTML = logs.map(log => {
-                    let oldVals = '', newVals = '';
-                    try { oldVals = log.oldValues ? JSON.stringify(JSON.parse(log.oldValues), null, 0) : '—'; } catch { oldVals = log.oldValues || '—'; }
-                    try { newVals = log.newValues ? JSON.stringify(JSON.parse(log.newValues), null, 0) : '—'; } catch { newVals = log.newValues || '—'; }
+                    let oldDisplay = formatAuditValues(log.oldValues);
+                    let newDisplay = formatAuditValues(log.newValues);
 
                     return `<div class="history-item">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -914,11 +1032,11 @@
                         <span class="history-meta">${new Date(log.timestamp).toLocaleString('tr-TR')}</span>
                     </div>
                     ${log.reason ? `<div style="color:var(--accent);font-size:11px;margin-top:4px;">📌 ${log.reason}</div>` : ''}
-                    <div class="history-values">
-                        <div>Eski: <code>${oldVals}</code></div>
-                        <div>Yeni: <code>${newVals}</code></div>
+                    <div class="history-values" style="display: block; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                        <div style="margin-bottom: 4px;"><strong>Eski:</strong> ${oldDisplay}</div>
+                        <div><strong>Yeni:</strong> ${newDisplay}</div>
                     </div>
-                    ${log.action === 'UPDATE' ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="rollback('${id}','${log.id}')">⏪ Bu noktaya geri al</button>` : ''}
+                    ${(log.action === 'UPDATE' || log.action === 'DELETE') ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="rollback('${id}','${log.id}')">⏪ Bu noktaya geri al</button>` : ''}
                 </div>`;
                 }).join('');
             } catch (e) {
@@ -943,6 +1061,14 @@
             } catch (e) {
                 toast('❌ ' + e.message, 'error');
             }
+        }
+
+        function closeHistory() {
+            document.getElementById('historyPanel').style.display = 'none';
+        }
+
+        function closeHistory() {
+            document.getElementById('historyPanel').style.display = 'none';
         }
 
         // Close modal on backdrop click

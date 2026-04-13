@@ -12,11 +12,23 @@ public class ConfigurationRepository(ConfigDbContext dbContext) : IConfiguration
         return await dbContext.Configurations.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<ConfigurationRecord>> GetConfigurationsAsync(string applicationName, string environment, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ConfigurationRecord>> GetConfigurationsAsync(string applicationName, string? environment, CancellationToken cancellationToken = default)
     {
         return await dbContext.Configurations
             .AsNoTracking()
-            .Where(c => c.ApplicationName == applicationName && c.Environment == environment && c.IsActive)
+            .Where(c => c.ApplicationName == applicationName &&
+                       (string.IsNullOrEmpty(environment) || c.Environment == environment) &&
+                       c.IsActive)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<ConfigurationRecord>> GetDeletedConfigurationsAsync(string applicationName, string? environment, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Configurations
+            .AsNoTracking()
+            .Where(c => c.ApplicationName == applicationName &&
+                       (string.IsNullOrEmpty(environment) || c.Environment == environment) &&
+                       !c.IsActive)
             .ToListAsync(cancellationToken);
     }
 
