@@ -1,36 +1,49 @@
+using System.Diagnostics;
 using DistributedConfigHub.Client;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace DemoConsumerApp.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TestController(IConfigSdkService configService) : ControllerBase
+public class TestController(
+    IConfigSdkService configService, 
+    DistributedConfigOptions configOptions,
+    IWebHostEnvironment env,
+    ILogger<TestController> logger) : ControllerBase
 {
+    private static readonly DateTime AppStartTime = Process.GetCurrentProcess().StartTime;
+
     [HttpGet]
     public IActionResult Get()
     {
-        // Başlangıçta IConfigSdkService tarafından RabbitMQ Hosted Service'da yüklenmiş olan belleği okuyoruz.
-        // Konfigürasyon yönetim paneli (API) üzerinden değer güncellendiğinde buradaki sonuçlar ANINDA değişecektir.
-        var paymentGatewayUrl = configService.GetString("PaymentGatewayUrl") ?? "https://varsayilan-gateway.com/api";
-        var maxTransactions = configService.GetInt("MaxIstanbulKartTransactionsPerMin", 100);
+        var paymentApiUrl = configService.GetString("ExternalPaymentApiUrl") ?? "https://pay.default-enterprise.com/api";
+        var maxTransactions = configService.GetInt("MaxConcurrentTransactions", 100);
         var isMaintenance = configService.GetBoolean("IsMaintenanceModeEnabled", false);
+        var dbConnection = configService.GetString("MainDatabase") ?? "unknown";
+        var uptime = DateTime.Now - AppStartTime;
 
         var data = new
         {
-            Message = "Demo Consumer App - Güncel İBB Konfigürasyon Bellek Durumu",
+            Message = "Demo Consumer App - Güncel Konfigürasyon Bellek Durumu",
             Timestamp = DateTimeOffset.UtcNow,
+            Uptime = uptime.ToString(@"hh\:mm\:ss"),
+            StartTime = AppStartTime.ToString("yyyy-MM-dd HH:mm:ss"),
+            Environment = new
+            {
+                AspNetCore = env.EnvironmentName,
+                ConfigHub = configOptions.Environment
+            },
             Configs = new
             {
-                PaymentGatewayUrl = paymentGatewayUrl,
-                MaxIstanbulKartTransactionsPerMin = maxTransactions,
-                IsMaintenanceModeEnabled = isMaintenance
+                PaymentApiUrl = paymentApiUrl,
+                MaxConcurrentTransactions = maxTransactions,
+                IsMaintenanceModeEnabled = isMaintenance,
+                Database = dbConnection
             }
         };
 
-        // Bu değerler ekrana (endpoint'e) ve ayrıca sunucu konsoluna JSON olarak yazdırılır.
-        Console.WriteLine($"[TestController] Anlık bellek durumu okundu: {JsonSerializer.Serialize(data.Configs)}");
+        logger.LogDebug("Current in-memory config state: {@Configs}", data.Configs);
 
         return Ok(data);
     }

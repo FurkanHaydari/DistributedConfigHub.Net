@@ -19,21 +19,27 @@ public class ConfigurationRecordConfiguration : IEntityTypeConfiguration<Configu
         
         builder.HasIndex(x => new { x.Name, x.ApplicationName, x.Environment }).IsUnique();
         
-        // IBB Seed Data
+        // Seed Data
         var seedDate = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
         builder.HasData(
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000001"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://dev-odeme.ibb.istanbul", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000002"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "100", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
+            // SERVICE-A - DEV
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000001"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://dev-pay.enterprise.com", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000002"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "100", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
             new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000003"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "true", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000101"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
 
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000004"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://test-odeme.ibb.istanbul", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000005"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "1000", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
+            // SERVICE-A - STAGING
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000004"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://test-pay.enterprise.com", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000005"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "1000", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
             new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000006"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000102"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
 
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000007"), "PaymentGatewayUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://odeme.ibb.istanbul", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000008"), "MaxIstanbulKartTransactionsPerMin", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "50000", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000009"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "prod", true) { CreatedAt = seedDate }
+            // SERVICE-A - PROD
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000007"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://pay.enterprise.com", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000008"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "50000", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000009"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
+            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000103"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "prod", true) { CreatedAt = seedDate }
         );
     }
 }

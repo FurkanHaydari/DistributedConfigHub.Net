@@ -1,8 +1,12 @@
 using DistributedConfigHub.Client;
+using DemoConsumerApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+// Dinamik DbContext ve Initializer kaydı
+builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
+builder.Services.AddDbContext<ProductDbContext>();
 
 builder.Services.AddDistributedConfigHub(options =>
 {
@@ -19,6 +23,11 @@ builder.Services.AddDistributedConfigHub(options =>
 });
 
 var app = builder.Build();
+
+// Sunum için uygulama başlarken her iki veritabanını da hazırla (yarat + seed)
+var initializer = app.Services.GetRequiredService<IDatabaseInitializer>();
+await initializer.InitializeAsync();
+
 
 app.UseAuthorization();
 app.MapControllers();
