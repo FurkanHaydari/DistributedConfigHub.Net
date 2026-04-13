@@ -25,6 +25,18 @@ builder.Services.AddDistributedConfigHub(options =>
 
 var app = builder.Build();
 
+// SDK konfigürasyon her güncellendiğinde tüm snapshot'ı logla
+var configOptions = app.Services.GetRequiredService<DistributedConfigOptions>();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+configOptions.OnConfigurationUpdated = sdk =>
+{
+    foreach (var (key, value) in sdk.GetAll())
+    {
+        logger.LogInformation("  ↳ {Key} = {Value}", key, value);
+    }
+    return Task.CompletedTask;
+};
+
 // Sunum için uygulama başlarken her iki veritabanını da hazırla (yarat + seed)
 var initializer = app.Services.GetRequiredService<IDatabaseInitializer>();
 await initializer.InitializeAsync();

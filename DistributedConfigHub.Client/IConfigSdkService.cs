@@ -6,5 +6,11 @@ public interface IConfigSdkService
     int GetInt(string key, int defaultValue = 0);
     double GetDouble(string key, double defaultValue = 0.0);
     bool GetBoolean(string key, bool defaultValue = false);
+    
+    /// <summary>
+    /// Bellekteki tüm konfigürasyonları (Key → Value) döner.
+    /// </summary>
+    IReadOnlyDictionary<string, string> GetAll();
+    
     Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default);
 }

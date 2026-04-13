@@ -40,6 +40,11 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
         return defaultValue;
     }
 
+    public IReadOnlyDictionary<string, string> GetAll()
+    {
+        return _cache.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
+    }
+
     public async Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default)
     {
         try

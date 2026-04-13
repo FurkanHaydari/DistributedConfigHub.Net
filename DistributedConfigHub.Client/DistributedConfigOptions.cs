@@ -17,6 +17,6 @@ public class DistributedConfigOptions
     /// Konfigürasyon güncellendiğinde çağrılacak opsiyonel callback.
     /// SDK kullanıcısı, güncelleme sonrası kendi loglamasını veya aksiyonunu bu callback ile enjekte edebilir.
     /// </summary>
-    public Action<IConfigSdkService>? OnConfigurationUpdated { get; set; }
+    public Func<IConfigSdkService, Task>? OnConfigurationUpdated { get; set; }
 }
 
