@@ -11,13 +11,13 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(options);
         
-        // Named HttpClient + IHttpClientFactory kaydı (DNS havuz yönetimi için)
-        services.AddHttpClient("ConfigHub")
-            .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+        services.AddHttpClient("ConfigHub", client =>
+        {
+            client.BaseAddress = new Uri(options.ApiBaseUrl.EndsWith('/') ? options.ApiBaseUrl : options.ApiBaseUrl + "/");
+            client.DefaultRequestHeaders.Add("X-Api-Key", options.ApiKey);
+        })
+        .SetHandlerLifetime(TimeSpan.FromMinutes(5));
         
-        // ConfigSdkService Singleton olarak kaydedilmeli çünkü:
-        // 1. BackgroundService (RabbitMqSubscriberHostedService) Singleton'dır
-        // 2. ConcurrentDictionary cache'i tüm uygulama yaşam döngüsünce korunmalıdır
         services.AddSingleton<IConfigSdkService>(sp =>
         {
             var factory = sp.GetRequiredService<IHttpClientFactory>();

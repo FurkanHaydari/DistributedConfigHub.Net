@@ -8,15 +8,9 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
 {
     // volatile: Referans değişimi anında tüm thread'ler tarafından görülür (atomic swap)
     private volatile ConcurrentDictionary<string, ConfigurationItem> _cache = new();
-
-    private readonly bool _initialized = InitializeHttpClient(httpClient, options);
-
-    private static bool InitializeHttpClient(HttpClient client, DistributedConfigOptions opts)
-    {
-        client.DefaultRequestHeaders.Add("X-Api-Key", opts.ApiKey);
-        return true;
-    }
-
+    // Aynı anda sadece 1 thread'in işlem yapmasını sağlayan kilit mekanizması
+    private readonly SemaphoreSlim _reloadLock = new(1, 1);
+    
     public string? GetString(string key) => _cache.TryGetValue(key, out var item) ? item.Value : null;
 
     public int GetInt(string key, int defaultValue = 0)
@@ -50,12 +44,15 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
     {
         return _cache.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
     }
+    
 
     public async Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default)
     {
+        // Eğer kilitliyse, asenkron olarak kilidin açılmasını bekle
+        await _reloadLock.WaitAsync(cancellationToken);
         try
         {
-            var url = $"{options.ApiBaseUrl.TrimEnd('/')}/Configurations?applicationName={options.ApplicationName}&environment={options.Environment}";
+            var url = $"Configurations?applicationName={options.ApplicationName}&environment={options.Environment}";
             var response = await httpClient.GetAsync(url, cancellationToken);
             
             if (response.IsSuccessStatusCode)
@@ -80,6 +77,11 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
         {
             logger.LogError(ex, "Failed to fetch configurations from API. Attempting to use local fallback.");
             await ReadFromFallbackAsync(cancellationToken);
+        }
+        finally
+        {
+            // Kiliti serbest bırak
+            _reloadLock.Release();
         }
     }
 

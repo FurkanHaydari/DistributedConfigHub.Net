@@ -50,7 +50,7 @@ public class ConfigSdkServiceTests
                 Content = new StringContent(JsonSerializer.Serialize(apiResponse))
             });
 
-        var httpClient = new HttpClient(handlerMock.Object);
+        var httpClient = new HttpClient(handlerMock.Object) { BaseAddress = new Uri(_options.ApiBaseUrl) };
         var sdkService = new ConfigSdkService(httpClient, _options, _loggerMock.Object);
 
         // Act
@@ -88,7 +88,7 @@ public class ConfigSdkServiceTests
                 StatusCode = HttpStatusCode.InternalServerError
             });
 
-        var httpClient = new HttpClient(handlerMock.Object);
+        var httpClient = new HttpClient(handlerMock.Object) { BaseAddress = new Uri(_options.ApiBaseUrl) };
         var sdkService = new ConfigSdkService(httpClient, _options, _loggerMock.Object);
 
         // Act
