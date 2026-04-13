@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Consumer — Ürün Kataloğu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1117;
+            color: #e1e4e8;
+            min-height: 100vh;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            background: linear-gradient(135deg, #1a1d27 0%, #12141c 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-online {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .status-maintenance {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .header-right span {
+            color: #a78bfa;
+            font-weight: 500;
+        }
+
+        .env-badge {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .container {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ─── PRODUCTS GRID ─── */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .product-card {
+            background: linear-gradient(145deg, #1a1d27, #14161e);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(96, 165, 250, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #f3f4f6;
+        }
+
+        .product-desc {
+            font-size: 0.82rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #34d399, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .product-id {
+            font-size: 0.65rem;
+            color: #4b5563;
+            margin-top: 0.75rem;
+            font-family: monospace;
+        }
+
+        /* ─── SYSTEM INFO PANEL (always visible) ─── */
+        .system-panel {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: linear-gradient(145deg, #1a1d27, #12141c);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 0.7rem;
+            color: #6b7280;
+            z-index: 1100;
+            min-width: 240px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .system-panel-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .system-panel-title .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        .system-panel-title .dot.warn {
+            background: #fbbf24;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .system-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+        }
+
+        .system-row .label {
+            color: #4b5563;
+        }
+
+        .system-row .value {
+            color: #d1d5db;
+            font-weight: 500;
+            font-family: 'Inter', monospace;
+        }
+
+        .system-row .value.uptime {
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        .system-row .value.env {
+            color: #60a5fa;
+        }
+
+        .system-row .value.db {
+            color: #a78bfa;
+        }
+
+        .system-row .value.warn {
+            color: #fbbf24;
+        }
+
+        /* ─── MAINTENANCE OVERLAY ─── */
+        .maintenance-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 17, 23, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+        }
+
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: wrench 3s ease-in-out infinite;
+        }
+
+        @keyframes wrench {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(15deg);
+            }
+
+            75% {
+                transform: rotate(-15deg);
+            }
+        }
+
+        .maintenance-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #fbbf24;
+        }
+
+        .maintenance-text {
+            font-size: 1rem;
+            color: #9ca3af;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .maintenance-env {
+            margin-top: 1.25rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .maintenance-env span {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        /* ─── LOADING ─── */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            padding: 2rem 2rem 5rem;
+            color: #4b5563;
+            font-size: 0.75rem;
+        }
+
+        .footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <h1>🛒 Demo Consumer App</h1>
+            <span id="statusBadge" class="status-badge status-online">Online</span>
+        </div>
+        <div class="header-right">
+            <span id="envBadge" class="env-badge">ENV: —</span>
+            Aktif DB: <span id="activeDb">—</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="mainContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                Yükleniyor...
+            </div>
+        </div>
+    </div>
+
+    <div id="maintenanceOverlay" class="maintenance-overlay" style="display: none;">
+        <div class="maintenance-icon">🔧</div>
+        <div class="maintenance-title">Bakım Modu Aktif</div>
+        <div class="maintenance-text">
+            Sistem şu anda bakımda. Lütfen kısa bir süre sonra tekrar deneyiniz.
+        </div>
+        <div class="maintenance-env" id="maintenanceEnv">
+            Ortam: <span>—</span>
+        </div>
+    </div>
+
+    <!-- System Info Panel — her iki modda da görünür -->
+    <div class="system-panel" id="systemPanel">
+        <div class="system-panel-title">
+            <div class="dot" id="panelDot"></div>
+            SİSTEM BİLGİSİ
+        </div>
+        <div class="system-row">
+            <span class="label">Uptime</span>
+            <span class="value uptime" id="panelUptime">—</span>
+        </div>
+        <div class="system-row">
+            <span class="label">Environment</span>
+            <span class="value env" id="panelEnv">—</span>
+        </div>
+        <div class="system-row">
+            <span class="label">Aktif DB</span>
+            <span class="value db" id="panelDb">—</span>
+        </div>
+        <div class="system-row">
+            <span class="label">Max İşlem</span>
+            <span class="value" id="panelMaxTx">—</span>
+        </div>
+        <div class="system-row">
+            <span class="label">Payment API</span>
+            <span class="value" id="panelPayment"
+                style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">—</span>
+        </div>
+        <div class="system-row">
+            <span class="label">Bakım Modu</span>
+            <span class="value" id="panelMaintenance">—</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Powered by <a href="http://localhost:5173" target="_blank">Distributed Config Hub</a>
+        <div class="refresh-note">Sayfa her 3 saniyede otomatik güncellenir</div>
+    </div>
+
+    <script>
+        const POLL_INTERVAL = 3000;
+
+        function parseDbName(connStr) {
+            if (!connStr || connStr === 'unknown') return 'unknown';
+            if (connStr.includes('db_beta')) return 'db_beta';
+            if (connStr.includes('db_alpha')) return 'db_alpha';
+            const match = connStr.match(/Database=([^;]+)/i);
+            return match ? match[1] : connStr;
+        }
+
+        async function refresh() {
+            try {
+                const configRes = await fetch('/Test');
+                const config = await configRes.json();
+
+                const isMaintenance = config.configs.isMaintenanceModeEnabled;
+                const dbConn = config.configs.database || 'unknown';
+                const envInfo = config.environment || {};
+                const envName = envInfo.configHub || envInfo.aspNetCore || 'unknown';
+                const dbName = parseDbName(dbConn);
+                const uptime = config.uptime || '—';
+                const maxTx = config.configs.maxConcurrentTransactions || '—';
+                const paymentApi = config.configs.paymentApiUrl || '—';
+
+                // ─── Header güncellemeleri ───
+                document.getElementById('envBadge').textContent = `ENV: ${envName.toUpperCase()}`;
+                document.getElementById('activeDb').textContent = dbName;
+
+                // ─── System Panel (her zaman güncellenir) ───
+                document.getElementById('panelUptime').textContent = uptime;
+                document.getElementById('panelEnv').textContent = envName.toUpperCase();
+                document.getElementById('panelDb').textContent = dbName;
+                document.getElementById('panelMaxTx').textContent = `${maxTx}/dk`;
+                document.getElementById('panelPayment').textContent = paymentApi;
+                document.getElementById('panelPayment').title = paymentApi;
+                document.getElementById('panelMaintenance').textContent = isMaintenance ? 'AKTİF' : 'Kapalı';
+                document.getElementById('panelMaintenance').className = isMaintenance ? 'value warn' : 'value';
+
+                // Dot rengi
+                document.getElementById('panelDot').className = isMaintenance ? 'dot warn' : 'dot';
+
+                // ─── Maintenance mode ───
+                if (isMaintenance) {
+                    document.getElementById('maintenanceOverlay').style.display = 'flex';
+                    document.getElementById('maintenanceEnv').innerHTML = `Ortam: <span>${envName.toUpperCase()}</span> · DB: <span>${dbName}</span>`;
+                    document.getElementById('statusBadge').className = 'status-badge status-maintenance';
+                    document.getElementById('statusBadge').textContent = 'Bakımda';
+                    return;
+                }
+
+                document.getElementById('maintenanceOverlay').style.display = 'none';
+                document.getElementById('statusBadge').className = 'status-badge status-online';
+                document.getElementById('statusBadge').textContent = 'Online';
+
+                // ─── Ürünleri çek ───
+                const productsRes = await fetch('/Products');
+                const products = await productsRes.json();
+
+                if (products.length === 0) {
+                    document.getElementById('mainContent').innerHTML = `
+                    <div class="loading">Henüz ürün bulunmuyor.</div>
+                `;
+                    return;
+                }
+
+                let html = '<div class="products-grid">';
+                for (const p of products) {
+                    html += `
+                    <div class="product-card">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-desc">${p.description}</div>
+                        <div class="product-price">₺${p.price.toLocaleString('tr-TR')}</div>
+                        <div class="product-id">ID: ${p.id}</div>
+                    </div>
+                `;
+                }
+                html += '</div>';
+                document.getElementById('mainContent').innerHTML = html;
+
+            } catch (err) {
+                document.getElementById('mainContent').innerHTML = `
+                <div class="loading" style="color: #ef4444;">
+                    ⚠️ API'ye bağlanılamadı: ${err.message}
+                </div>
+            `;
+            }
+        }
+
+        refresh();
+        setInterval(refresh, POLL_INTERVAL);
+    </script>
+
+</body>
+
+</html>
