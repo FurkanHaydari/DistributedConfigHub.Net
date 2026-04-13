@@ -4,55 +4,44 @@ using Xunit;
 
 namespace DistributedConfigHub.IntegrationTests;
 
-public class LiveUpdateIntegrationTest : IClassFixture<CustomWebApplicationFactory>
+public class LiveUpdateIntegrationTest(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly CustomWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public LiveUpdateIntegrationTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        // WebApplicationFactory bizim için tüm sanal altyapıya bağlı bir sahte(Client) oluşturur
-        _client = factory.CreateClient();
-        
-        // Testlerin 403 Forbidden alıp patlamaması için yetki sızdırıyoruz (appsettings.json Mock'una göre)
-        _client.DefaultRequestHeaders.Add("X-Api-Key", "ibb-demo-secret-key");
-    }
-
     [Fact]
-    public async Task UpdateIbbConfiguration_ShouldModifyDatabaseAndTriggerRabbitMqWithoutError()
+    public async Task UpdateConfiguration_ShouldModifyDatabaseAndTriggerRabbitMqWithoutError()
     {
-        // 1. Orijinal IBB ayarlarını "Prod" ortamı için çek
-        var getResponse = await _client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
+        var client = factory.CreateAuthenticatedClient();
+        
+        // 1. Orijinal ayarları "Prod" ortamı için çek
+        var getResponse = await client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
         getResponse.EnsureSuccessStatusCode();
 
-        var configs = await getResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(_factory.DefaultJsonOptions);
+        var configs = await getResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(factory.DefaultJsonOptions);
         
         Assert.NotNull(configs);
         Assert.NotEmpty(configs); // Migration seed datasının başarıyla geldiğini doğrular
 
-        // İBB'nin MaxIstanbulKartTransactionsPerMin prod değerini bul (Seed'deki değeri: 50000)
-        var kartLimitConfig = configs.FirstOrDefault(c => c.Name == "MaxIstanbulKartTransactionsPerMin");
-        Assert.NotNull(kartLimitConfig);
-        Assert.Equal("50000", kartLimitConfig.Value);
+        // MaxConcurrentTransactions prod değerini bul (Seed'deki değeri: 50000)
+        var limitConfig = configs.FirstOrDefault(c => c.Name == "MaxConcurrentTransactions");
+        Assert.NotNull(limitConfig);
+        Assert.Equal("50000", limitConfig.Value);
 
         // 2. Yeni değeri REST üzerinden PUT ile 99999 yap (Gerçek senaryo - Testcontainer RabbitMQ fırlatılacak)
         var putPayload = new
         {
-            id = kartLimitConfig.Id,
+            id = limitConfig.Id,
             value = "99999"
         };
 
-        var putResponse = await _client.PutAsJsonAsync($"/Configurations/{kartLimitConfig.Id}", putPayload);
+        var putResponse = await client.PutAsJsonAsync($"/Configurations/{limitConfig.Id}", putPayload);
         Assert.Equal(System.Net.HttpStatusCode.NoContent, putResponse.StatusCode);
 
         // 3. Gerçekten güncellenmiş mi diye tekrar Testcontainer DB'den taze çek
-        var getUpdatedResponse = await _client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
-        var updatedConfigs = await getUpdatedResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(_factory.DefaultJsonOptions);
+        var getUpdatedResponse = await client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
+        var updatedConfigs = await getUpdatedResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(factory.DefaultJsonOptions);
         
-        var updatedKartLimitConfig = updatedConfigs!.First(c => c.Name == "MaxIstanbulKartTransactionsPerMin");
+        var updatedLimitConfig = updatedConfigs!.First(c => c.Name == "MaxConcurrentTransactions");
         
         // Assert: 50000 olan limitin başarıyla 99999 olduğunu ve sistemin çökmediğini kanıtla
-        Assert.Equal("99999", updatedKartLimitConfig.Value);
+        Assert.Equal("99999", updatedLimitConfig.Value);
     }
 }
