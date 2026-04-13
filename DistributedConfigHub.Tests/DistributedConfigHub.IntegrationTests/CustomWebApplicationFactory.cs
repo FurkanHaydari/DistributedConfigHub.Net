@@ -33,15 +33,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     public CustomWebApplicationFactory()
     {
-        _dbContainer = new PostgreSqlBuilder()
-            .WithImage("postgres:15-alpine")
+        _dbContainer = new PostgreSqlBuilder("postgres:15-alpine")
             .WithDatabase("ConfigHubDb_Test")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
 
-        _rabbitMqContainer = new RabbitMqBuilder()
-            .WithImage("rabbitmq:3-management-alpine")
+        _rabbitMqContainer = new RabbitMqBuilder("rabbitmq:3-management-alpine")
             .WithUsername("guest")
             .WithPassword("guest")
             .Build();
