@@ -1,0 +1,697 @@
+{
+  "info": {
+    "name": "Distributed Config Hub",
+    "_postman_id": "dch-full-collection-2026",
+    "description": "Distributed Configuration Hub — tüm API endpoint'leri.\n\n**Config Hub API** (port 5173): Konfigürasyon CRUD, Health, Audit & Rollback\n**Demo Consumer App** (port 5174): Ürünler, Test (canlı config durumu), ServiceHealth\n\n> ⚠️ Config Hub API endpoint'leri `X-Api-Key` header'ı gerektirir.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "configHubBaseUrl",
+      "value": "http://localhost:5173",
+      "type": "string"
+    },
+    {
+      "key": "consumerBaseUrl",
+      "value": "http://localhost:5174",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "enterprise-demo-key",
+      "type": "string"
+    },
+    {
+      "key": "configId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auditLogId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔧 Config Hub API",
+      "description": "Merkezi konfigürasyon yönetim API'si (port 5173).\nTüm Configurations endpoint'leri `X-Api-Key` header'ı gerektirir.",
+      "item": [
+        {
+          "name": "Health",
+          "description": "Sistem sağlık kontrolü — PostgreSQL, RabbitMQ bağlantıları ve kayıtlı servisler.",
+          "item": [
+            {
+              "name": "Get Health Status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Health",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Health"]
+                },
+                "description": "PostgreSQL ve RabbitMQ bağlantı durumlarını, uptime bilgisini ve kayıtlı servislerin listesini döner.\n\n**Başarılı yanıtlar:** 200 OK\n**Hatalı yanıtlar:** 503 Service Unavailable (bağlantı sorunu)"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Configurations — CRUD",
+          "description": "Konfigürasyon kayıtları üzerinde CRUD işlemleri.\n\n**ConfigurationType Enum:**\n- `String` = 0\n- `Int` = 1\n- `Double` = 2\n- `Boolean` = 3",
+          "item": [
+            {
+              "name": "Get All Configurations",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// İlk konfigürasyonun ID'sini otomatik kaydet",
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData && jsonData.length > 0) {",
+                      "    pm.collectionVariables.set('configId', jsonData[0].id);",
+                      "    console.log('configId set to: ' + jsonData[0].id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"],
+                  "query": [
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A",
+                      "description": "Servis adı filtresi"
+                    },
+                    {
+                      "key": "environment",
+                      "value": "dev",
+                      "disabled": true,
+                      "description": "Ortam filtresi (Opsiyonel: dev / staging / prod)"
+                    }
+                  ]
+                },
+                "description": "Belirtilen servis ve ortama ait tüm aktif konfigürasyonları listeler.\n\n> 💡 İlk çalıştırmada `configId` değişkeni otomatik set edilir."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Deleted Configurations",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/deleted?applicationName=SERVICE-A",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "deleted"],
+                  "query": [
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A"
+                    },
+                    {
+                      "key": "environment",
+                      "value": "dev",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Belirtilen servis ve ortama ait tüm silinmiş (inactive) konfigürasyonları listeler."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Configuration by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}"]
+                },
+                "description": "Tekil konfigürasyon kaydını ID ile getirir.\n\n> ⚠️ Önce \"Get All Configurations\" çalıştırarak `configId` değişkenini set edin."
+              },
+              "response": []
+            },
+            {
+              "name": "Create Configuration (String)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var newId = pm.response.json();",
+                      "    pm.collectionVariables.set('configId', newId);",
+                      "    console.log('New configId: ' + newId);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"NewFeatureFlag\",\n  \"type\": 0,\n  \"value\": \"enabled\",\n  \"applicationName\": \"SERVICE-A\",\n  \"environment\": \"dev\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"]
+                },
+                "description": "Yeni bir konfigürasyon kaydı oluşturur.\n\n**Body:**\n- `name`: Konfigürasyon adı\n- `type`: 0=String, 1=Int, 2=Double, 3=Boolean\n- `value`: Değer (string olarak)\n- `applicationName`: Hedef servis adı\n- `environment`: Hedef ortam\n\n> 💡 Oluşturulan ID otomatik olarak `configId` değişkenine kaydedilir."
+              },
+              "response": []
+            },
+            {
+              "name": "Create Configuration (Boolean)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"IsMaintenanceModeEnabled\",\n  \"type\": 3,\n  \"value\": \"false\",\n  \"applicationName\": \"SERVICE-A\",\n  \"environment\": \"staging\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"]
+                },
+                "description": "Boolean tipinde konfigürasyon oluşturma örneği.\n\n- `type: 3` → Boolean"
+              },
+              "response": []
+            },
+            {
+              "name": "Create Configuration (Int)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"MaxConcurrentTransactions\",\n  \"type\": 1,\n  \"value\": \"200\",\n  \"applicationName\": \"SERVICE-A\",\n  \"environment\": \"prod\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"]
+                },
+                "description": "Int tipinde konfigürasyon oluşturma örneği.\n\n- `type: 1` → Int"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Configuration",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"{{configId}}\",\n  \"value\": \"updated-value\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}"]
+                },
+                "description": "Mevcut bir konfigürasyonun değerini günceller.\n\nGüncelleme anında RabbitMQ üzerinden tüm subscriber'lara bildirim gönderilir.\n\n> ⚠️ URL'deki `id` ile body'deki `id` aynı olmalıdır."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Configuration",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}"]
+                },
+                "description": "Konfigürasyonu soft-delete yapar (IsActive = false).\n\n**Yanıt:** 204 No Content"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Configurations — Audit & Rollback",
+          "description": "Konfigürasyon değişiklik geçmişi ve geri alma işlemleri.",
+          "item": [
+            {
+              "name": "Get Configuration History",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData && jsonData.length > 0) {",
+                      "    pm.collectionVariables.set('auditLogId', jsonData[0].id);",
+                      "    console.log('auditLogId set to: ' + jsonData[0].id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}/history",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}", "history"]
+                },
+                "description": "Belirtilen konfigürasyonun tüm değişiklik geçmişini (audit log) döner.\n\nHer kayıt için: OperationType (INSERT/UPDATE/DELETE), OldValue, NewValue, Timestamp.\n\n> 💡 İlk audit log ID'si otomatik olarak `auditLogId` değişkenine kaydedilir."
+              },
+              "response": []
+            },
+            {
+              "name": "Rollback Configuration",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}/rollback/{{auditLogId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}", "rollback", "{{auditLogId}}"]
+                },
+                "description": "Konfigürasyonu belirtilen audit log noktasına geri alır.\n\n**Akış:**\n1. Önce history'den hedef `auditLogId`'yi belirleyin\n2. Bu endpoint ile o noktaya rollback yapın\n3. RabbitMQ üzerinden tüm subscriber'lar bilgilendirilir\n\n> ⚠️ Önce \"Get Configuration History\" çalıştırarak `auditLogId` değişkenini set edin."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Security Tests",
+          "description": "API anahtarı doğrulama testleri.",
+          "item": [
+            {
+              "name": "❌ Request Without API Key (403)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"],
+                  "query": [
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A"
+                    }
+                  ]
+                },
+                "description": "API anahtarı olmadan istek gönderir.\n\n**Beklenen:** 403 Forbidden"
+              },
+              "response": []
+            },
+            {
+              "name": "❌ Request With Wrong API Key (403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "wrong-key-12345",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"],
+                  "query": [
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A"
+                    }
+                  ]
+                },
+                "description": "Yanlış API anahtarı ile istek gönderir.\n\n**Beklenen:** 403 Forbidden"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🛒 Demo Consumer App",
+      "description": "Örnek consumer servis API'si (port 5174).\nConfig Hub SDK'sını kullanan demo uygulama.",
+      "item": [
+        {
+          "name": "Get Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{consumerBaseUrl}}/Products",
+              "host": ["{{consumerBaseUrl}}"],
+              "path": ["Products"]
+            },
+            "description": "Aktif veritabanındaki tüm ürünleri listeler.\n\n- `db_alpha` aktifken: 5 adet Alpha ürünü\n- `db_beta` aktifken: 4 adet Beta ürünü\n\n> 💡 Hot-swap sonrası ürünlerin değiştiğini doğrulamak için kullanın."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Test (Live Config State)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{consumerBaseUrl}}/Test",
+              "host": ["{{consumerBaseUrl}}"],
+              "path": ["Test"]
+            },
+            "description": "SDK'dan okunan canlı konfigürasyon durumunu döner.\n\n**Yanıt içeriği:**\n- `uptime`: Uygulamanın çalışma süresi\n- `startTime`: Başlangıç zamanı\n- `environment`: ASP.NET Core ve Config Hub ortam bilgisi\n- `configs.isMaintenanceModeEnabled`: Bakım modu durumu\n- `configs.database`: Aktif veritabanı connection string'i\n- `configs.paymentApiUrl`: Harici ödeme API URL'i\n- `configs.maxConcurrentTransactions`: Maksimum eşzamanlı işlem sayısı"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{consumerBaseUrl}}/ServiceHealth",
+              "host": ["{{consumerBaseUrl}}"],
+              "path": ["ServiceHealth"]
+            },
+            "description": "Consumer uygulamasının sağlık durumunu bildirir.\n\n**Yanıt içeriği:**\n- `status`: Healthy ✅ / Degraded ⚠️\n- `uptime`: Çalışma süresi (restart kontrolü)\n- `runtimeConfiguration.mainDatabase`: SDK'dan okunan aktif DB bağlantısı\n- `runtimeConfiguration.resolvedDatabaseName`: Gerçek bağlanan DB adı\n- `runtimeConfiguration.databaseStatus`: Bağlantı durumu\n\n> 🎯 Hot-swap sonrası `resolvedDatabaseName` değiştiğini doğrulamak için kullanın."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Demo Senaryoları",
+      "description": "Sırasıyla çalıştırılacak demo akışları.",
+      "item": [
+        {
+          "name": "1️⃣ Bakım Modu — Aktifleştir",
+          "description": "IsMaintenanceModeEnabled değerini true yapar.",
+          "item": [
+            {
+              "name": "Step 1: Get Configs (find maintenance config)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "var maintenanceConfig = jsonData.find(c => c.name === 'IsMaintenanceModeEnabled');",
+                      "if (maintenanceConfig) {",
+                      "    pm.collectionVariables.set('configId', maintenanceConfig.id);",
+                      "    console.log('Maintenance configId: ' + maintenanceConfig.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A&environment=dev",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"],
+                  "query": [
+                    { "key": "applicationName", "value": "SERVICE-A" },
+                    { "key": "environment", "value": "dev" }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 2: Enable Maintenance Mode",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"{{configId}}\",\n  \"value\": \"true\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 3: Verify on Consumer",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{consumerBaseUrl}}/Test",
+                  "host": ["{{consumerBaseUrl}}"],
+                  "path": ["Test"]
+                },
+                "description": "configs.isMaintenanceModeEnabled = true olmalı"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "2️⃣ Database Hot-Swap (Alpha → Beta)",
+          "description": "MainDatabase değerini db_alpha'dan db_beta'ya çevirir.",
+          "item": [
+            {
+              "name": "Step 1: Get Configs (find MainDatabase)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "var dbConfig = jsonData.find(c => c.name === 'MainDatabase');",
+                      "if (dbConfig) {",
+                      "    pm.collectionVariables.set('configId', dbConfig.id);",
+                      "    console.log('MainDatabase configId: ' + dbConfig.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A&environment=dev",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations"],
+                  "query": [
+                    { "key": "applicationName", "value": "SERVICE-A" },
+                    { "key": "environment", "value": "dev" }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 2: Switch to db_beta",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Api-Key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"{{configId}}\",\n  \"value\": \"Host=postgres;Database=db_beta;Username=postgres;Password=postgres\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
+                  "host": ["{{configHubBaseUrl}}"],
+                  "path": ["Configurations", "{{configId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 3: Verify Products Changed",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{consumerBaseUrl}}/Products",
+                  "host": ["{{consumerBaseUrl}}"],
+                  "path": ["Products"]
+                },
+                "description": "Artık Beta ürünleri (Beta Smartwatch Ultra, Beta Tablet Air, ...) görünmeli."
+              },
+              "response": []
+            },
+            {
+              "name": "Step 4: Verify Uptime (No Restart)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{consumerBaseUrl}}/ServiceHealth",
+                  "host": ["{{consumerBaseUrl}}"],
+                  "path": ["ServiceHealth"]
+                },
+                "description": "Uptime artmaya devam etmeli — uygulama restart olmadı!"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
