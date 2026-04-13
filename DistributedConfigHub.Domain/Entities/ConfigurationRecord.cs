@@ -15,10 +15,14 @@ public class ConfigurationRecord(Guid id, string name, ConfigurationType type, s
     public void UpdateValue(string newValue)
     {
         Value = newValue;
+        UpdatedBy = "admin";
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void Deactivate()
     {
         IsActive = false;
+        UpdatedBy = "admin";
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

@@ -18,7 +18,11 @@ public class CreateConfigurationCommandHandler(IConfigurationRepository reposito
             request.Value, 
             request.ApplicationName, 
             request.Environment, 
-            true);
+            true)
+        {
+            CreatedBy = "admin",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
         await repository.AddAsync(newRecord, cancellationToken);
         return newRecord.Id;
