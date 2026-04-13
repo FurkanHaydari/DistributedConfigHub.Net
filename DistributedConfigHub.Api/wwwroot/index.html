@@ -587,6 +587,62 @@
             padding: 2px 8px;
             border-radius: 4px;
         }
+
+        /* Error Card Style */
+        .error-card {
+            display: none;
+            background: var(--danger-bg);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .error-card-title {
+            color: var(--danger);
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-card-close {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            opacity: 0.7;
+            font-size: 16px;
+        }
+
+        .error-card-close:hover {
+            opacity: 1;
+        }
+
+        .error-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #fca5a5;
+            font-size: 13px;
+        }
+
+        .error-list li {
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 
@@ -625,6 +681,17 @@
                 <div class="value" id="totalConfigs">—</div>
                 <div class="detail" id="lastCheck">Son kontrol: —</div>
             </div>
+        </div>
+
+        <!-- Error Message Card (Initially Hidden) -->
+        <div id="errorCard" class="error-card">
+            <div class="error-card-header">
+                <div class="error-card-title">
+                    <span>⚠️</span> API Doğrulama Hatası
+                </div>
+                <button class="error-card-close" onclick="hideError()">✕</button>
+            </div>
+            <ul id="errorList" class="error-list"></ul>
         </div>
 
         <!-- Toolbar -->
@@ -716,6 +783,15 @@
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <h2 id="modalTitle">Yeni Konfigürasyon</h2>
+            
+            <!-- Modal Internal Error Card -->
+            <div id="modalErrorCard" class="error-card" style="margin-bottom: 20px; border-radius: 8px; padding: 12px 16px;">
+                <div class="error-card-header" style="margin-bottom: 4px;">
+                    <div class="error-card-title" style="font-size: 13px;">⚠️ Hata</div>
+                </div>
+                <ul id="modalErrorList" class="error-list" style="font-size: 12px;"></ul>
+            </div>
+
             <div class="form-group">
                 <label>Konfig Adı (Name)</label>
                 <input type="text" id="cfgName" placeholder="Example: MaxUsers">
@@ -765,6 +841,62 @@
 
         function headers() {
             return { 'Content-Type': 'application/json', 'X-Api-Key': getApiKey() };
+        }
+
+        // Health
+        async function checkHealth() {
+            // ...
+        }
+
+        // Error Handling
+        function showError(errorData) {
+            const isModalOpen = document.getElementById('modal').classList.contains('active');
+            const cardId = isModalOpen ? 'modalErrorCard' : 'errorCard';
+            const listId = isModalOpen ? 'modalErrorList' : 'errorList';
+            
+            const card = document.getElementById(cardId);
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            
+            if (typeof errorData === 'string') {
+                list.innerHTML = `<li>${errorData}</li>`;
+            } else {
+                // 1. Ana Hata Mesajı (ProblemDetails Title & Detail)
+                if (errorData.title || errorData.detail) {
+                    const title = errorData.title ? `<strong>${errorData.title}</strong>: ` : '';
+                    const detail = errorData.detail || '';
+                    if (title || detail) {
+                        list.innerHTML += `<li style="list-style:none; margin-left:-20px; margin-bottom:8px;">${title}${detail}</li>`;
+                    }
+                }
+
+                // 2. Detaylı Validasyon Hataları (FluentValidation / errors dictionary)
+                if (errorData.errors) {
+                    Object.keys(errorData.errors).forEach(key => {
+                        const messages = errorData.errors[key];
+                        // JSON path ($.value) temizliği
+                        const cleanKey = key.startsWith('$.') ? key.substring(2) : key;
+                        messages.forEach(msg => {
+                            list.innerHTML += `<li><strong>${cleanKey}:</strong> ${msg}</li>`;
+                        });
+                    });
+                }
+                
+                // Hiçbir şey bulunamadıysa yedek mekanizma
+                if (!list.innerHTML) {
+                    list.innerHTML = `<li>Bilinmeyen bir API hatası oluştu. (Status: ${errorData.status || '???'})</li>`;
+                }
+            }
+            
+            card.style.display = 'block';
+            if (!isModalOpen) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function hideError() {
+            document.getElementById('errorCard').style.display = 'none';
+            document.getElementById('modalErrorCard').style.display = 'none';
         }
 
         // Toast
@@ -843,7 +975,9 @@
 
         // Load Configurations
         async function loadConfigurations() {
+            hideError();
             const app = document.getElementById('filterApp').value;
+// ...
             const env = document.getElementById('filterEnv').value;
             const table = document.getElementById('configTable');
             const deletedTable = document.getElementById('deletedConfigTable');
@@ -906,6 +1040,7 @@
 
         // Create / Edit Modal
         function openCreateModal() {
+            hideError();
             document.getElementById('modalTitle').textContent = 'Yeni Konfigürasyon';
             document.getElementById('modalSubmit').textContent = 'Oluştur';
             document.getElementById('cfgId').value = '';
@@ -922,6 +1057,7 @@
         }
 
         function openEditModal(id) {
+            hideError();
             const cfg = configs.find(c => c.id === id);
             if (!cfg) return;
             document.getElementById('modalTitle').textContent = `"${cfg.name}" Değerini Güncelle`;
@@ -956,8 +1092,12 @@
                     });
                     if (res.ok) {
                         toast('✅ Değer güncellendi ve consumer\'lara sinyal gönderildi!');
+                        closeModal();
+                        loadConfigurations();
                     } else {
-                        toast('❌ Güncelleme başarısız: ' + res.statusText, 'error');
+                        const err = await res.json();
+                        showError(err);
+                        toast('❌ Güncelleme başarısız', 'error');
                     }
                 } else {
                     // CREATE
@@ -975,13 +1115,14 @@
                     });
                     if (res.ok) {
                         toast('✅ Yeni konfigürasyon oluşturuldu!');
+                        closeModal();
+                        loadConfigurations();
                     } else {
                         const err = await res.json();
-                        toast('❌ ' + (err.detail || err.title || 'Oluşturma başarısız'), 'error');
+                        showError(err);
+                        toast('❌ Oluşturma başarısız', 'error');
                     }
                 }
-                closeModal();
-                loadConfigurations();
                 checkHealth();
             } catch (e) {
                 toast('❌ İstek hatası: ' + e.message, 'error');
@@ -991,6 +1132,7 @@
         // Delete
         async function deleteConfig(id) {
             if (!confirm('Bu konfigürasyonu pasife almak istediğinize emin misiniz?')) return;
+            hideError();
             try {
                 const res = await fetch(`${API_BASE}/Configurations/${id}`, { method: 'DELETE', headers: headers() });
                 if (res.ok) {
@@ -998,10 +1140,12 @@
                     loadConfigurations();
                     checkHealth();
                 } else {
+                    const err = await res.json();
+                    showError(err);
                     toast('❌ Silme başarısız', 'error');
                 }
             } catch (e) {
-                toast('❌ ' + e.message, 'error');
+                showError('İstek hatası: ' + e.message);
             }
         }
 
@@ -1047,6 +1191,7 @@
         // Rollback
         async function rollback(configId, auditLogId) {
             if (!confirm('Bu konfigürasyonu seçilen noktaya geri almak istediğinize emin misiniz?')) return;
+            hideError();
             try {
                 const res = await fetch(`${API_BASE}/Configurations/${configId}/rollback/${auditLogId}`, {
                     method: 'POST', headers: headers()
@@ -1056,15 +1201,13 @@
                     loadConfigurations();
                     showHistory(configId, document.getElementById('historyTitle').textContent);
                 } else {
+                    const err = await res.json();
+                    showError(err);
                     toast('❌ Rollback başarısız', 'error');
                 }
             } catch (e) {
-                toast('❌ ' + e.message, 'error');
+                showError('İstek hatası: ' + e.message);
             }
-        }
-
-        function closeHistory() {
-            document.getElementById('historyPanel').style.display = 'none';
         }
 
         function closeHistory() {
