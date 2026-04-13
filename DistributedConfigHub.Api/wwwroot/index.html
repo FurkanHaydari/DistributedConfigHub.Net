@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,12 @@
             --warning-bg: rgba(251, 191, 36, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
@@ -43,378 +49,724 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky; top: 0; z-index: 100;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             backdrop-filter: blur(12px);
         }
-        .header-left { display: flex; align-items: center; gap: 12px; }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .logo {
-            width: 36px; height: 36px; border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: linear-gradient(135deg, var(--accent), #a78bfa);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
         }
-        .header h1 { font-size: 18px; font-weight: 600; }
-        .header h1 span { color: var(--text-muted); font-weight: 400; font-size: 14px; }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header h1 span {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 14px;
+        }
+
         .api-key-input {
-            display: flex; align-items: center; gap: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .api-key-input label { font-size: 12px; color: var(--text-secondary); }
+
+        .api-key-input label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
         .api-key-input input {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
-            color: var(--text-primary); padding: 6px 12px; font-size: 13px; width: 200px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-size: 13px;
+            width: 200px;
             font-family: 'Inter', monospace;
         }
-        .api-key-input input:focus { outline: none; border-color: var(--accent); }
+
+        .api-key-input input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
 
         /* Layout */
-        .container { max-width: 1280px; margin: 0 auto; padding: 24px 32px; }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
 
         /* Health Cards */
         .health-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px; margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
         }
+
         .health-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-            padding: 20px; transition: all 0.2s;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
         }
-        .health-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-        .health-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .health-card .value { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .health-card .detail { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-        .dot.green { background: var(--success); box-shadow: 0 0 8px var(--success); }
-        .dot.red { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-        .dot.pulse { animation: pulse 2s infinite; }
+
+        .health-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .health-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .health-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .health-card .detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .dot.green {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .dot.red {
+            background: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+        }
+
+        .dot.pulse {
+            animation: pulse 2s infinite;
+        }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         /* Tabs / Filter Bar */
         .toolbar {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .filter-group { display: flex; gap: 8px; align-items: center; }
-        .filter-group select, .filter-group input {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
-            color: var(--text-primary); padding: 8px 12px; font-size: 13px; font-family: 'Inter';
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
-        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--accent); }
+
+        .filter-group select,
+        .filter-group input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: 'Inter';
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
         .btn {
-            padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
-            font-size: 13px; font-weight: 500; font-family: 'Inter';
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter';
             transition: all 0.15s ease;
         }
+
         .btn-primary {
-            background: var(--accent); color: white;
+            background: var(--accent);
+            color: white;
         }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
         .btn-secondary {
-            background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
-        .btn-secondary:hover { background: var(--bg-card-hover); }
-        .btn-danger { background: var(--danger-bg); color: var(--danger); }
-        .btn-danger:hover { background: rgba(248,113,113,0.2); }
-        .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 113, 113, 0.2);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
 
         /* Table */
         .table-container {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             overflow: hidden;
         }
-        table { width: 100%; border-collapse: collapse; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
         thead th {
-            text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600;
-            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
-            background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
         }
+
         tbody td {
-            padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
         }
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background: var(--bg-card-hover); }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-card-hover);
+        }
+
         .badge {
-            display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
         }
-        .badge-active { background: var(--success-bg); color: var(--success); }
-        .badge-inactive { background: var(--danger-bg); color: var(--danger); }
-        .badge-type { background: var(--accent-glow); color: var(--accent); }
-        .badge-env { background: var(--warning-bg); color: var(--warning); }
-        .value-cell { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; max-width: 280px; word-break: break-all; }
-        .actions { display: flex; gap: 6px; }
+
+        .badge-active {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .badge-inactive {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge-type {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .badge-env {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .value-cell {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            max-width: 280px;
+            word-break: break-all;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
 
         /* Modal */
         .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 900; align-items: center; justify-content: center;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 900;
+            align-items: center;
+            justify-content: center;
             backdrop-filter: blur(4px);
         }
-        .modal-overlay.active { display: flex; }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
         .modal {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
-            padding: 28px; width: 480px; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
-        .modal h2 { margin-bottom: 20px; font-size: 18px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
-        .form-group input, .form-group select {
-            width: 100%; background: var(--bg-secondary); border: 1px solid var(--border);
-            border-radius: 8px; color: var(--text-primary); padding: 10px 14px;
-            font-size: 14px; font-family: 'Inter';
+
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
         }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: 'Inter';
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 24px;
+        }
 
         /* History Panel */
-        .history-panel { margin-top: 12px; }
-        .history-item {
-            background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;
-            padding: 12px 16px; margin-bottom: 8px; font-size: 12px;
+        .history-panel {
+            margin-top: 12px;
         }
-        .history-item .action { font-weight: 600; }
-        .history-item .action.INSERT { color: var(--success); }
-        .history-item .action.UPDATE { color: var(--warning); }
-        .history-item .action.ROLLBACK { color: var(--accent); }
-        .history-item .action.DELETE { color: var(--danger); }
-        .history-meta { color: var(--text-muted); margin-top: 4px; }
-        .history-values { display: flex; gap: 16px; margin-top: 6px; }
-        .history-values code { background: var(--bg-card); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+
+        .history-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .history-item .action {
+            font-weight: 600;
+        }
+
+        .history-item .action.INSERT {
+            color: var(--success);
+        }
+
+        .history-item .action.UPDATE {
+            color: var(--warning);
+        }
+
+        .history-item .action.ROLLBACK {
+            color: var(--accent);
+        }
+
+        .history-item .action.DELETE {
+            color: var(--danger);
+        }
+
+        .history-meta {
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .history-values {
+            display: flex;
+            gap: 16px;
+            margin-top: 6px;
+        }
+
+        .history-values code {
+            background: var(--bg-card);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
 
         /* Empty state */
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
 
         /* Toast */
-        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .toast {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
-            padding: 12px 20px; font-size: 13px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 13px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s ease;
         }
-        .toast.success { border-left: 3px solid var(--success); }
-        .toast.error { border-left: 3px solid var(--danger); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+        .toast.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
         /* Registered Apps */
-        .apps-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-        .app-chip {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
-            padding: 10px 16px; font-size: 13px; display: flex; align-items: center; gap: 8px;
+        .apps-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .app-chip .count { font-size: 11px; background: var(--accent-glow); color: var(--accent); padding: 2px 8px; border-radius: 4px; }
+
+        .app-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-chip .count {
+            font-size: 11px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="header">
-    <div class="header-left">
-        <div class="logo">⚙</div>
-        <h1>Config Hub <span>Yönetim Paneli</span></h1>
-    </div>
-    <div class="api-key-input">
-        <label>API Key:</label>
-        <input type="password" id="apiKey" value="ibb-demo-secret-key" placeholder="X-Api-Key">
-    </div>
-</div>
-
-<div class="container">
-    <!-- Health Status -->
-    <div class="health-grid" id="healthGrid">
-        <div class="health-card">
-            <div class="label">PostgreSQL</div>
-            <div class="value" id="pgStatus"><span class="dot pulse"></span> Kontrol ediliyor...</div>
-            <div class="detail" id="pgDetail"></div>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">⚙</div>
+            <h1>Config Hub <span>Yönetim Paneli</span></h1>
         </div>
-        <div class="health-card">
-            <div class="label">RabbitMQ</div>
-            <div class="value" id="rmqStatus"><span class="dot pulse"></span> Kontrol ediliyor...</div>
-            <div class="detail" id="rmqDetail"></div>
-        </div>
-        <div class="health-card">
-            <div class="label">Kayıtlı Servisler</div>
-            <div id="appsContainer" class="apps-grid" style="margin-top:8px;"></div>
-        </div>
-        <div class="health-card">
-            <div class="label">Toplam Aktif Config</div>
-            <div class="value" id="totalConfigs">—</div>
-            <div class="detail" id="lastCheck">Son kontrol: —</div>
+        <div class="api-key-input">
+            <label>API Key:</label>
+            <input type="password" id="apiKey" value="enterprise-demo-key" placeholder="X-Api-Key">
         </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-        <div class="filter-group">
-            <select id="filterApp">
-                <option value="SERVICE-A">SERVICE-A</option>
-                <option value="SERVICE-B">SERVICE-B</option>
-            </select>
-            <select id="filterEnv">
-                <option value="dev">dev</option>
-                <option value="staging">staging</option>
-                <option value="prod" selected>prod</option>
-            </select>
-            <button class="btn btn-secondary" onclick="loadConfigurations()">🔄 Yenile</button>
+    <div class="container">
+        <!-- Health Status -->
+        <div class="health-grid" id="healthGrid">
+            <div class="health-card">
+                <div class="label">PostgreSQL</div>
+                <div class="value" id="pgStatus"><span class="dot pulse"></span> Kontrol ediliyor...</div>
+                <div class="detail" id="pgDetail"></div>
+            </div>
+            <div class="health-card">
+                <div class="label">RabbitMQ</div>
+                <div class="value" id="rmqStatus"><span class="dot pulse"></span> Kontrol ediliyor...</div>
+                <div class="detail" id="rmqDetail"></div>
+            </div>
+            <div class="health-card">
+                <div class="label">Kayıtlı Servisler</div>
+                <div id="appsContainer" class="apps-grid" style="margin-top:8px;"></div>
+            </div>
+            <div class="health-card">
+                <div class="label">Toplam Aktif Config</div>
+                <div class="value" id="totalConfigs">—</div>
+                <div class="detail" id="lastCheck">Son kontrol: —</div>
+            </div>
         </div>
-        <button class="btn btn-primary" onclick="openCreateModal()">+ Yeni Konfigürasyon</button>
-    </div>
 
-    <!-- Table -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Ad</th>
-                    <th>Tip</th>
-                    <th>Değer</th>
-                    <th>Ortam</th>
-                    <th>Durum</th>
-                    <th>İşlemler</th>
-                </tr>
-            </thead>
-            <tbody id="configTable">
-                <tr><td colspan="6" class="empty-state"><div class="icon">📋</div>Yükleniyor...</td></tr>
-            </tbody>
-        </table>
-    </div>
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="filter-group">
+                <select id="filterApp" onchange="loadConfigurations()">
+                    <option value="SERVICE-A">SERVICE-A</option>
+                    <option value="SERVICE-B">SERVICE-B</option>
+                </select>
+                <select id="filterEnv" onchange="loadConfigurations()">
+                    <option value="dev">dev</option>
+                    <option value="staging">staging</option>
+                    <option value="prod" selected>prod</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadConfigurations()">🔄 Yenile</button>
+            </div>
+            <button class="btn btn-primary" onclick="openCreateModal()">+ Yeni Konfigürasyon</button>
+        </div>
 
-    <!-- History Panel (shown below table on demand) -->
-    <div id="historyPanel" style="display:none; margin-top: 24px;">
-        <h3 style="margin-bottom: 12px; font-size: 15px;">📜 Değişiklik Geçmişi — <span id="historyTitle"></span></h3>
-        <div id="historyList" class="history-panel"></div>
-    </div>
-</div>
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad</th>
+                        <th>Tip</th>
+                        <th>Değer</th>
+                        <th>Ortam</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="configTable">
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="icon">📋</div>Yükleniyor...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-<!-- Create / Edit Modal -->
-<div class="modal-overlay" id="modal">
-    <div class="modal">
-        <h2 id="modalTitle">Yeni Konfigürasyon</h2>
-        <div class="form-group">
-            <label>Konfig Adı (Name)</label>
-            <input type="text" id="cfgName" placeholder="MaxUsers">
-        </div>
-        <div class="form-group">
-            <label>Tip (Type)</label>
-            <select id="cfgType">
-                <option value="String">String</option>
-                <option value="Int">Int</option>
-                <option value="Double">Double</option>
-                <option value="Boolean">Boolean</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Değer (Value)</label>
-            <input type="text" id="cfgValue" placeholder="1000">
-        </div>
-        <div class="form-group">
-            <label>Uygulama (ApplicationName)</label>
-            <input type="text" id="cfgApp" placeholder="SERVICE-A">
-        </div>
-        <div class="form-group">
-            <label>Ortam (Environment)</label>
-            <select id="cfgEnv">
-                <option value="dev">dev</option>
-                <option value="staging">staging</option>
-                <option value="prod">prod</option>
-            </select>
-        </div>
-        <input type="hidden" id="cfgId">
-        <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
-            <button class="btn btn-primary" id="modalSubmit" onclick="submitConfig()">Oluştur</button>
+        <!-- History Panel (shown below table on demand) -->
+        <div id="historyPanel" style="display:none; margin-top: 24px;">
+            <h3 style="margin-bottom: 12px; font-size: 15px;">📜 Değişiklik Geçmişi — <span id="historyTitle"></span>
+            </h3>
+            <div id="historyList" class="history-panel"></div>
         </div>
     </div>
-</div>
 
-<div class="toast-container" id="toasts"></div>
+    <!-- Create / Edit Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <h2 id="modalTitle">Yeni Konfigürasyon</h2>
+            <div class="form-group">
+                <label>Konfig Adı (Name)</label>
+                <input type="text" id="cfgName" placeholder="Example: MaxUsers">
+            </div>
+            <div class="form-group">
+                <label>Tip (Type)</label>
+                <select id="cfgType">
+                    <option value="String">String</option>
+                    <option value="Int">Int</option>
+                    <option value="Double">Double</option>
+                    <option value="Boolean">Boolean</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Değer (Value)</label>
+                <input type="text" id="cfgValue" placeholder="1000">
+            </div>
+            <div class="form-group">
+                <label>Uygulama (ApplicationName)</label>
+                <input type="text" id="cfgApp" placeholder="SERVICE-A">
+            </div>
+            <div class="form-group">
+                <label>Ortam (Environment)</label>
+                <select id="cfgEnv">
+                    <option value="dev">dev</option>
+                    <option value="staging">staging</option>
+                    <option value="prod">prod</option>
+                </select>
+            </div>
+            <input type="hidden" id="cfgId">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                <button class="btn btn-primary" id="modalSubmit" onclick="submitConfig()">Oluştur</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-    const API_BASE = '';
-    let configs = [];
+    <div class="toast-container" id="toasts"></div>
 
-    function getApiKey() {
-        return document.getElementById('apiKey').value;
-    }
+    <script>
+        const API_BASE = '';
+        let configs = [];
 
-    function headers() {
-        return { 'Content-Type': 'application/json', 'X-Api-Key': getApiKey() };
-    }
+        function getApiKey() {
+            return document.getElementById('apiKey').value;
+        }
 
-    // Toast
-    function toast(msg, type = 'success') {
-        const container = document.getElementById('toasts');
-        const el = document.createElement('div');
-        el.className = `toast ${type}`;
-        el.textContent = msg;
-        container.appendChild(el);
-        setTimeout(() => el.remove(), 4000);
-    }
+        function headers() {
+            return { 'Content-Type': 'application/json', 'X-Api-Key': getApiKey() };
+        }
 
-    // Health Check
-    async function checkHealth() {
-        try {
-            const res = await fetch(`${API_BASE}/Health`);
-            const data = await res.json();
+        // Toast
+        function toast(msg, type = 'success') {
+            const container = document.getElementById('toasts');
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
 
-            // PostgreSQL
-            const pgEl = document.getElementById('pgStatus');
-            const pgDetail = document.getElementById('pgDetail');
-            pgEl.innerHTML = `<span class="dot ${data.postgreSql.isHealthy ? 'green' : 'red'}"></span> ${data.postgreSql.isHealthy ? 'Bağlı' : 'Bağlantı Yok'}`;
-            pgDetail.textContent = data.postgreSql.message;
+        // Health Check
+        async function checkHealth() {
+            try {
+                const res = await fetch(`${API_BASE}/Health`);
+                const data = await res.json();
 
-            // RabbitMQ
-            const rmqEl = document.getElementById('rmqStatus');
-            const rmqDetail = document.getElementById('rmqDetail');
-            rmqEl.innerHTML = `<span class="dot ${data.rabbitMq.isHealthy ? 'green' : 'red'}"></span> ${data.rabbitMq.isHealthy ? 'Bağlı' : 'Bağlantı Yok'}`;
-            rmqDetail.textContent = data.rabbitMq.message;
+                // PostgreSQL
+                const pgEl = document.getElementById('pgStatus');
+                const pgDetail = document.getElementById('pgDetail');
+                pgEl.innerHTML = `<span class="dot ${data.postgreSql.isHealthy ? 'green' : 'red'}"></span> ${data.postgreSql.isHealthy ? 'Bağlı' : 'Bağlantı Yok'}`;
+                pgDetail.textContent = data.postgreSql.message;
 
-            // Registered Apps
-            const appsContainer = document.getElementById('appsContainer');
-            let totalConfigs = 0;
-            if (data.registeredApplications?.length) {
-                appsContainer.innerHTML = data.registeredApplications.map(app => {
-                    totalConfigs += app.configCount;
-                    return `<div class="app-chip">
+                // RabbitMQ
+                const rmqEl = document.getElementById('rmqStatus');
+                const rmqDetail = document.getElementById('rmqDetail');
+                rmqEl.innerHTML = `<span class="dot ${data.rabbitMq.isHealthy ? 'green' : 'red'}"></span> ${data.rabbitMq.isHealthy ? 'Bağlı' : 'Bağlantı Yok'}`;
+                rmqDetail.textContent = data.rabbitMq.message;
+
+                // Registered Apps
+                const appsContainer = document.getElementById('appsContainer');
+                let totalConfigs = 0;
+                if (data.registeredApplications?.length) {
+                    appsContainer.innerHTML = data.registeredApplications.map(app => {
+                        totalConfigs += app.configCount;
+                        return `<div class="app-chip">
                         <strong>${app.name}</strong>
                         <span class="count">${app.configCount} config</span>
                         <span style="color:var(--text-muted);font-size:11px">${app.environments.join(', ')}</span>
                     </div>`;
-                }).join('');
-            } else {
-                appsContainer.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Henüz kayıt yok</span>';
-            }
+                    }).join('');
+                } else {
+                    appsContainer.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Henüz kayıt yok</span>';
+                }
 
-            document.getElementById('totalConfigs').textContent = totalConfigs;
-            document.getElementById('lastCheck').textContent = `Son kontrol: ${new Date().toLocaleTimeString('tr-TR')}`;
-        } catch (e) {
-            document.getElementById('pgStatus').innerHTML = '<span class="dot red"></span> Erişilemiyor';
-            document.getElementById('rmqStatus').innerHTML = '<span class="dot red"></span> Erişilemiyor';
+                document.getElementById('totalConfigs').textContent = totalConfigs;
+                document.getElementById('lastCheck').textContent = `Son kontrol: ${new Date().toLocaleTimeString('tr-TR')}`;
+            } catch (e) {
+                document.getElementById('pgStatus').innerHTML = '<span class="dot red"></span> Erişilemiyor';
+                document.getElementById('rmqStatus').innerHTML = '<span class="dot red"></span> Erişilemiyor';
+            }
         }
-    }
 
-    // Load Configurations
-    async function loadConfigurations() {
-        const app = document.getElementById('filterApp').value;
-        const env = document.getElementById('filterEnv').value;
-        const table = document.getElementById('configTable');
+        // Load Configurations
+        async function loadConfigurations() {
+            const app = document.getElementById('filterApp').value;
+            const env = document.getElementById('filterEnv').value;
+            const table = document.getElementById('configTable');
 
-        try {
-            const res = await fetch(`${API_BASE}/Configurations?applicationName=${app}&environment=${env}`, { headers: headers() });
+            try {
+                const res = await fetch(`${API_BASE}/Configurations?applicationName=${app}&environment=${env}`, { headers: headers() });
 
-            if (res.status === 401 || res.status === 403) {
-                table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">🔒</div>Yetkisiz erişim. API Key'i kontrol edin.</td></tr>`;
-                return;
-            }
+                if (res.status === 401 || res.status === 403) {
+                    table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">🔒</div>Yetkisiz erişim. API Key'i kontrol edin.</td></tr>`;
+                    return;
+                }
 
-            configs = await res.json();
-            if (!configs.length) {
-                table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">📋</div>Bu filtre için konfigürasyon bulunamadı.</td></tr>`;
-                return;
-            }
+                configs = await res.json();
+                if (!configs.length) {
+                    table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">📋</div>Bu filtre için konfigürasyon bulunamadı.</td></tr>`;
+                    return;
+                }
 
-            table.innerHTML = configs.map(c => `
+                table.innerHTML = configs.map(c => `
                 <tr>
                     <td><strong>${c.name}</strong></td>
                     <td><span class="badge badge-type">${c.type}</span></td>
@@ -428,135 +780,135 @@
                     </td>
                 </tr>
             `).join('');
-        } catch (e) {
-            table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">⚠️</div>API'ye erişilemedi: ${e.message}</td></tr>`;
-        }
-    }
-
-    // Create / Edit Modal
-    function openCreateModal() {
-        document.getElementById('modalTitle').textContent = 'Yeni Konfigürasyon';
-        document.getElementById('modalSubmit').textContent = 'Oluştur';
-        document.getElementById('cfgId').value = '';
-        document.getElementById('cfgName').value = '';
-        document.getElementById('cfgName').disabled = false;
-        document.getElementById('cfgType').value = 'String';
-        document.getElementById('cfgType').disabled = false;
-        document.getElementById('cfgValue').value = '';
-        document.getElementById('cfgApp').value = document.getElementById('filterApp').value;
-        document.getElementById('cfgApp').disabled = false;
-        document.getElementById('cfgEnv').value = document.getElementById('filterEnv').value;
-        document.getElementById('cfgEnv').disabled = false;
-        document.getElementById('modal').classList.add('active');
-    }
-
-    function openEditModal(id) {
-        const cfg = configs.find(c => c.id === id);
-        if (!cfg) return;
-        document.getElementById('modalTitle').textContent = `"${cfg.name}" Değerini Güncelle`;
-        document.getElementById('modalSubmit').textContent = 'Güncelle';
-        document.getElementById('cfgId').value = cfg.id;
-        document.getElementById('cfgName').value = cfg.name;
-        document.getElementById('cfgName').disabled = true;
-        document.getElementById('cfgType').value = cfg.type;
-        document.getElementById('cfgType').disabled = true;
-        document.getElementById('cfgValue').value = cfg.value;
-        document.getElementById('cfgApp').value = cfg.applicationName;
-        document.getElementById('cfgApp').disabled = true;
-        document.getElementById('cfgEnv').value = cfg.environment;
-        document.getElementById('cfgEnv').disabled = true;
-        document.getElementById('modal').classList.add('active');
-    }
-
-    function closeModal() {
-        document.getElementById('modal').classList.remove('active');
-    }
-
-    async function submitConfig() {
-        const id = document.getElementById('cfgId').value;
-        const value = document.getElementById('cfgValue').value;
-
-        try {
-            if (id) {
-                // UPDATE
-                const res = await fetch(`${API_BASE}/Configurations/${id}`, {
-                    method: 'PUT', headers: headers(),
-                    body: JSON.stringify({ id, value })
-                });
-                if (res.ok) {
-                    toast('✅ Değer güncellendi ve consumer\'lara sinyal gönderildi!');
-                } else {
-                    toast('❌ Güncelleme başarısız: ' + res.statusText, 'error');
-                }
-            } else {
-                // CREATE
-                const typeMap = { 'String': 0, 'Int': 1, 'Double': 2, 'Boolean': 3 };
-                const body = {
-                    name: document.getElementById('cfgName').value,
-                    type: typeMap[document.getElementById('cfgType').value],
-                    value: value,
-                    applicationName: document.getElementById('cfgApp').value,
-                    environment: document.getElementById('cfgEnv').value
-                };
-                const res = await fetch(`${API_BASE}/Configurations`, {
-                    method: 'POST', headers: headers(),
-                    body: JSON.stringify(body)
-                });
-                if (res.ok) {
-                    toast('✅ Yeni konfigürasyon oluşturuldu!');
-                } else {
-                    const err = await res.json();
-                    toast('❌ ' + (err.detail || err.title || 'Oluşturma başarısız'), 'error');
-                }
+            } catch (e) {
+                table.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">⚠️</div>API'ye erişilemedi: ${e.message}</td></tr>`;
             }
-            closeModal();
-            loadConfigurations();
-            checkHealth();
-        } catch (e) {
-            toast('❌ İstek hatası: ' + e.message, 'error');
         }
-    }
 
-    // Delete
-    async function deleteConfig(id) {
-        if (!confirm('Bu konfigürasyonu pasife almak istediğinize emin misiniz?')) return;
-        try {
-            const res = await fetch(`${API_BASE}/Configurations/${id}`, { method: 'DELETE', headers: headers() });
-            if (res.ok) {
-                toast('🗑 Konfigürasyon pasife alındı.');
+        // Create / Edit Modal
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Yeni Konfigürasyon';
+            document.getElementById('modalSubmit').textContent = 'Oluştur';
+            document.getElementById('cfgId').value = '';
+            document.getElementById('cfgName').value = '';
+            document.getElementById('cfgName').disabled = false;
+            document.getElementById('cfgType').value = 'String';
+            document.getElementById('cfgType').disabled = false;
+            document.getElementById('cfgValue').value = '';
+            document.getElementById('cfgApp').value = document.getElementById('filterApp').value;
+            document.getElementById('cfgApp').disabled = false;
+            document.getElementById('cfgEnv').value = document.getElementById('filterEnv').value;
+            document.getElementById('cfgEnv').disabled = false;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function openEditModal(id) {
+            const cfg = configs.find(c => c.id === id);
+            if (!cfg) return;
+            document.getElementById('modalTitle').textContent = `"${cfg.name}" Değerini Güncelle`;
+            document.getElementById('modalSubmit').textContent = 'Güncelle';
+            document.getElementById('cfgId').value = cfg.id;
+            document.getElementById('cfgName').value = cfg.name;
+            document.getElementById('cfgName').disabled = true;
+            document.getElementById('cfgType').value = cfg.type;
+            document.getElementById('cfgType').disabled = true;
+            document.getElementById('cfgValue').value = cfg.value;
+            document.getElementById('cfgApp').value = cfg.applicationName;
+            document.getElementById('cfgApp').disabled = true;
+            document.getElementById('cfgEnv').value = cfg.environment;
+            document.getElementById('cfgEnv').disabled = true;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        async function submitConfig() {
+            const id = document.getElementById('cfgId').value;
+            const value = document.getElementById('cfgValue').value;
+
+            try {
+                if (id) {
+                    // UPDATE
+                    const res = await fetch(`${API_BASE}/Configurations/${id}`, {
+                        method: 'PUT', headers: headers(),
+                        body: JSON.stringify({ id, value })
+                    });
+                    if (res.ok) {
+                        toast('✅ Değer güncellendi ve consumer\'lara sinyal gönderildi!');
+                    } else {
+                        toast('❌ Güncelleme başarısız: ' + res.statusText, 'error');
+                    }
+                } else {
+                    // CREATE
+                    const typeMap = { 'String': 0, 'Int': 1, 'Double': 2, 'Boolean': 3 };
+                    const body = {
+                        name: document.getElementById('cfgName').value,
+                        type: typeMap[document.getElementById('cfgType').value],
+                        value: value,
+                        applicationName: document.getElementById('cfgApp').value,
+                        environment: document.getElementById('cfgEnv').value
+                    };
+                    const res = await fetch(`${API_BASE}/Configurations`, {
+                        method: 'POST', headers: headers(),
+                        body: JSON.stringify(body)
+                    });
+                    if (res.ok) {
+                        toast('✅ Yeni konfigürasyon oluşturuldu!');
+                    } else {
+                        const err = await res.json();
+                        toast('❌ ' + (err.detail || err.title || 'Oluşturma başarısız'), 'error');
+                    }
+                }
+                closeModal();
                 loadConfigurations();
                 checkHealth();
-            } else {
-                toast('❌ Silme başarısız', 'error');
+            } catch (e) {
+                toast('❌ İstek hatası: ' + e.message, 'error');
             }
-        } catch (e) {
-            toast('❌ ' + e.message, 'error');
         }
-    }
 
-    // History
-    async function showHistory(id, name) {
-        const panel = document.getElementById('historyPanel');
-        const list = document.getElementById('historyList');
-        document.getElementById('historyTitle').textContent = name;
-        panel.style.display = 'block';
-        list.innerHTML = '<div style="color:var(--text-muted);padding:12px;">Yükleniyor...</div>';
-
-        try {
-            const res = await fetch(`${API_BASE}/Configurations/${id}/history`, { headers: headers() });
-            const logs = await res.json();
-
-            if (!logs.length) {
-                list.innerHTML = '<div style="color:var(--text-muted);padding:12px;">Henüz geçmiş kaydı yok.</div>';
-                return;
+        // Delete
+        async function deleteConfig(id) {
+            if (!confirm('Bu konfigürasyonu pasife almak istediğinize emin misiniz?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/Configurations/${id}`, { method: 'DELETE', headers: headers() });
+                if (res.ok) {
+                    toast('🗑 Konfigürasyon pasife alındı.');
+                    loadConfigurations();
+                    checkHealth();
+                } else {
+                    toast('❌ Silme başarısız', 'error');
+                }
+            } catch (e) {
+                toast('❌ ' + e.message, 'error');
             }
+        }
 
-            list.innerHTML = logs.map(log => {
-                let oldVals = '', newVals = '';
-                try { oldVals = log.oldValues ? JSON.stringify(JSON.parse(log.oldValues), null, 0) : '—'; } catch { oldVals = log.oldValues || '—'; }
-                try { newVals = log.newValues ? JSON.stringify(JSON.parse(log.newValues), null, 0) : '—'; } catch { newVals = log.newValues || '—'; }
+        // History
+        async function showHistory(id, name) {
+            const panel = document.getElementById('historyPanel');
+            const list = document.getElementById('historyList');
+            document.getElementById('historyTitle').textContent = name;
+            panel.style.display = 'block';
+            list.innerHTML = '<div style="color:var(--text-muted);padding:12px;">Yükleniyor...</div>';
 
-                return `<div class="history-item">
+            try {
+                const res = await fetch(`${API_BASE}/Configurations/${id}/history`, { headers: headers() });
+                const logs = await res.json();
+
+                if (!logs.length) {
+                    list.innerHTML = '<div style="color:var(--text-muted);padding:12px;">Henüz geçmiş kaydı yok.</div>';
+                    return;
+                }
+
+                list.innerHTML = logs.map(log => {
+                    let oldVals = '', newVals = '';
+                    try { oldVals = log.oldValues ? JSON.stringify(JSON.parse(log.oldValues), null, 0) : '—'; } catch { oldVals = log.oldValues || '—'; }
+                    try { newVals = log.newValues ? JSON.stringify(JSON.parse(log.newValues), null, 0) : '—'; } catch { newVals = log.newValues || '—'; }
+
+                    return `<div class="history-item">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span class="action ${log.action}">${log.action}</span>
                         <span class="history-meta">${new Date(log.timestamp).toLocaleString('tr-TR')}</span>
@@ -568,42 +920,43 @@
                     </div>
                     ${log.action === 'UPDATE' ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="rollback('${id}','${log.id}')">⏪ Bu noktaya geri al</button>` : ''}
                 </div>`;
-            }).join('');
-        } catch (e) {
-            list.innerHTML = `<div style="color:var(--danger);padding:12px;">Hata: ${e.message}</div>`;
-        }
-    }
-
-    // Rollback
-    async function rollback(configId, auditLogId) {
-        if (!confirm('Bu konfigürasyonu seçilen noktaya geri almak istediğinize emin misiniz?')) return;
-        try {
-            const res = await fetch(`${API_BASE}/Configurations/${configId}/rollback/${auditLogId}`, {
-                method: 'POST', headers: headers()
-            });
-            if (res.ok) {
-                toast('⏪ Rollback başarılı! Consumer\'lar bilgilendirildi.');
-                loadConfigurations();
-                showHistory(configId, document.getElementById('historyTitle').textContent);
-            } else {
-                toast('❌ Rollback başarısız', 'error');
+                }).join('');
+            } catch (e) {
+                list.innerHTML = `<div style="color:var(--danger);padding:12px;">Hata: ${e.message}</div>`;
             }
-        } catch (e) {
-            toast('❌ ' + e.message, 'error');
         }
-    }
 
-    // Close modal on backdrop click
-    document.getElementById('modal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeModal();
-    });
+        // Rollback
+        async function rollback(configId, auditLogId) {
+            if (!confirm('Bu konfigürasyonu seçilen noktaya geri almak istediğinize emin misiniz?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/Configurations/${configId}/rollback/${auditLogId}`, {
+                    method: 'POST', headers: headers()
+                });
+                if (res.ok) {
+                    toast('⏪ Rollback başarılı! Consumer\'lar bilgilendirildi.');
+                    loadConfigurations();
+                    showHistory(configId, document.getElementById('historyTitle').textContent);
+                } else {
+                    toast('❌ Rollback başarısız', 'error');
+                }
+            } catch (e) {
+                toast('❌ ' + e.message, 'error');
+            }
+        }
 
-    // Init
-    checkHealth();
-    loadConfigurations();
-    // Her 30 saniyede health check yenile
-    setInterval(checkHealth, 30000);
-</script>
+        // Close modal on backdrop click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // Init
+        checkHealth();
+        loadConfigurations();
+        // Her 30 saniyede health check yenile
+        setInterval(checkHealth, 30000);
+    </script>
 
 </body>
+
 </html>
