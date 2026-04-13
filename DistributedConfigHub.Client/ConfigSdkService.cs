@@ -4,22 +4,17 @@ using Microsoft.Extensions.Logging;
 
 namespace DistributedConfigHub.Client;
 
-public class ConfigSdkService : IConfigSdkService
+public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions options, ILogger<ConfigSdkService> logger) : IConfigSdkService
 {
     // volatile: Referans değişimi anında tüm thread'ler tarafından görülür (atomic swap)
     private volatile ConcurrentDictionary<string, ConfigurationItem> _cache = new();
-    private readonly HttpClient _httpClient;
-    private readonly DistributedConfigOptions _options;
-    private readonly ILogger<ConfigSdkService> _logger;
 
-    public ConfigSdkService(HttpClient httpClient, DistributedConfigOptions options, ILogger<ConfigSdkService> logger)
+    private readonly bool _initialized = InitializeHttpClient(httpClient, options);
+
+    private static bool InitializeHttpClient(HttpClient client, DistributedConfigOptions opts)
     {
-        _httpClient = httpClient;
-        _options = options;
-        _logger = logger;
-        
-        // Sunucuya atılacak tüm isteklerde Kimlik Anahtarını HTTP Header olarak gönder!
-        _httpClient.DefaultRequestHeaders.Add("X-Api-Key", _options.ApiKey);
+        client.DefaultRequestHeaders.Add("X-Api-Key", opts.ApiKey);
+        return true;
     }
 
     public string? GetString(string key) => _cache.TryGetValue(key, out var item) ? item.Value : null;
@@ -49,8 +44,8 @@ public class ConfigSdkService : IConfigSdkService
     {
         try
         {
-            var url = $"{_options.ApiBaseUrl.TrimEnd('/')}/Configurations?applicationName={_options.ApplicationName}&environment={_options.Environment}";
-            var response = await _httpClient.GetAsync(url, cancellationToken);
+            var url = $"{options.ApiBaseUrl.TrimEnd('/')}/Configurations?applicationName={options.ApplicationName}&environment={options.Environment}";
+            var response = await httpClient.GetAsync(url, cancellationToken);
             
             if (response.IsSuccessStatusCode)
             {
@@ -61,38 +56,38 @@ public class ConfigSdkService : IConfigSdkService
                 {
                     SwapCache(items);
                     
-                    await File.WriteAllTextAsync(_options.FallbackFilePath, content, cancellationToken);
-                    _logger.LogInformation("Configurations successfully loaded from API and cached to {FallbackFile}.", _options.FallbackFilePath);
+                    await File.WriteAllTextAsync(options.FallbackFilePath, content, cancellationToken);
+                    logger.LogInformation("Configurations successfully loaded from API and cached to {FallbackFile}.", options.FallbackFilePath);
                     return;
                 }
             }
             
-            _logger.LogWarning("API responded with {StatusCode}. Attempting to read from local fallback.", response.StatusCode);
+            logger.LogWarning("API responded with {StatusCode}. Attempting to read from local fallback.", response.StatusCode);
             await ReadFromFallbackAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to fetch configurations from API. Attempting to use local fallback.");
+            logger.LogError(ex, "Failed to fetch configurations from API. Attempting to use local fallback.");
             await ReadFromFallbackAsync(cancellationToken);
         }
     }
 
     private async Task ReadFromFallbackAsync(CancellationToken cancellationToken)
     {
-        if (File.Exists(_options.FallbackFilePath))
+        if (File.Exists(options.FallbackFilePath))
         {
-            var content = await File.ReadAllTextAsync(_options.FallbackFilePath, cancellationToken);
+            var content = await File.ReadAllTextAsync(options.FallbackFilePath, cancellationToken);
             var items = JsonSerializer.Deserialize<List<ConfigurationItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
             if (items is not null)
             {
                 SwapCache(items);
-                _logger.LogInformation("Configurations loaded from local fallback file.");
+                logger.LogInformation("Configurations loaded from local fallback file.");
             }
         }
         else
         {
-            _logger.LogWarning("Local fallback file not found at {FallbackFile}. The configuration cache remains empty.", _options.FallbackFilePath);
+            logger.LogWarning("Local fallback file not found at {FallbackFile}. The configuration cache remains empty.", options.FallbackFilePath);
         }
     }
 

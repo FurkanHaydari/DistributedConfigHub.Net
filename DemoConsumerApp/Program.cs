@@ -12,13 +12,14 @@ builder.Services.AddDistributedConfigHub(options =>
 {
     builder.Configuration.GetSection("DistributedConfig").Bind(options);
     
-    // Konfigürasyon güncellendiğinde çağrılacak geri bildirim fonksiyonu
-    options.OnConfigurationUpdated = configService =>
+    // ASPNETCORE_ENVIRONMENT'tan beslen ve .NET standart env keywordlerini
+    // Config Hub'daki temiz ve framework-agnostic keywordlere dönüştür
+    options.Environment = builder.Environment.EnvironmentName switch
     {
-        var paymentGw = configService.GetString("PaymentGatewayUrl");
-        var limit = configService.GetInt("MaxIstanbulKartTransactionsPerMin");
-        var maintenance = configService.GetBoolean("IsMaintenanceModeEnabled");
-        Console.WriteLine($"[EVENT BAŞARILI] Bellek güncellendi → Gateway: {paymentGw}, Limit: {limit}, Bakım: {maintenance}");
+        "Development" => "dev",
+        "Staging"     => "staging",
+        "Production"  => "prod",
+        var custom     => custom.ToLowerInvariant()
     };
 });
 
