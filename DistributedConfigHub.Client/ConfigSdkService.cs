@@ -35,8 +35,14 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
 
     public bool GetBoolean(string key, bool defaultValue = false)
     {
-        if (_cache.TryGetValue(key, out var item) && bool.TryParse(item.Value, out var parsed))
-            return parsed;
+        if (_cache.TryGetValue(key, out var item))
+        {
+            if (bool.TryParse(item.Value, out var parsed))
+                return parsed;
+            
+            if (item.Value == "1") return true;
+            if (item.Value == "0") return false;
+        }
         return defaultValue;
     }
 
