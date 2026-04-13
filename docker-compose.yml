@@ -12,8 +12,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 3s
-      timeout: 3s
+      interval: 10s
+      timeout: 10s
       retries: 10
     restart: unless-stopped
 
@@ -56,6 +56,8 @@ services:
       context: .
       dockerfile: DemoConsumerApp/Dockerfile
     container_name: confighub-demo
+    ports:
+      - "5174:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production # Development, Staging ve Production için ayarlanabilir.
       - DistributedConfig__ApiBaseUrl=http://config_api:8080
