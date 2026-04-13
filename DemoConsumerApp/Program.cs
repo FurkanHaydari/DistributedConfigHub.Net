@@ -4,6 +4,9 @@ using DemoConsumerApp.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Dinamik DbContext ve Initializer kaydı
 builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
 builder.Services.AddDbContext<ProductDbContext>();
@@ -40,6 +43,9 @@ configOptions.OnConfigurationUpdated = sdk =>
 // Sunum için uygulama başlarken her iki veritabanını da hazırla (yarat + seed)
 var initializer = app.Services.GetRequiredService<IDatabaseInitializer>();
 await initializer.InitializeAsync();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.UseAuthorization();
