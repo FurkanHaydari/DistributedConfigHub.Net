@@ -24,22 +24,142 @@ public class ConfigurationRecordConfiguration : IEntityTypeConfiguration<Configu
 
         builder.HasData(
             // SERVICE-A - DEV
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000001"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://dev-pay.enterprise.com", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000002"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "100", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000003"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "true", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000101"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "dev", true) { CreatedAt = seedDate },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), 
+                Name = "ExternalPaymentApiUrl", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "https://dev-pay.enterprise.com", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "dev", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), 
+                Name = "MaxConcurrentTransactions", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Int, 
+                Value = "100", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "dev", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000003"), 
+                Name = "IsMaintenanceModeEnabled", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, 
+                Value = "true", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "dev", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000101"), 
+                Name = "MainDatabase", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "dev", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
 
             // SERVICE-A - STAGING
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000004"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://test-pay.enterprise.com", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000005"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "1000", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000006"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000102"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "staging", true) { CreatedAt = seedDate },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"), 
+                Name = "ExternalPaymentApiUrl", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "https://test-pay.enterprise.com", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "staging", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000005"), 
+                Name = "MaxConcurrentTransactions", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Int, 
+                Value = "1000", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "staging", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000006"), 
+                Name = "IsMaintenanceModeEnabled", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, 
+                Value = "false", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "staging", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000102"), 
+                Name = "MainDatabase", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "staging", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
 
             // SERVICE-A - PROD
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000007"), "ExternalPaymentApiUrl", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "https://pay.enterprise.com", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000008"), "MaxConcurrentTransactions", DistributedConfigHub.Domain.Enums.ConfigurationType.Int, "50000", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000009"), "IsMaintenanceModeEnabled", DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, "false", "SERVICE-A", "prod", true) { CreatedAt = seedDate },
-            new ConfigurationRecord(Guid.Parse("00000000-0000-0000-0000-000000000103"), "MainDatabase", DistributedConfigHub.Domain.Enums.ConfigurationType.String, "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", "SERVICE-A", "prod", true) { CreatedAt = seedDate }
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000007"), 
+                Name = "ExternalPaymentApiUrl", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "https://pay.enterprise.com", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "prod", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000008"), 
+                Name = "MaxConcurrentTransactions", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Int, 
+                Value = "50000", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "prod", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000009"), 
+                Name = "IsMaintenanceModeEnabled", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.Boolean, 
+                Value = "false", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "prod", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            },
+            new { 
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000103"), 
+                Name = "MainDatabase", 
+                Type = DistributedConfigHub.Domain.Enums.ConfigurationType.String, 
+                Value = "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres", 
+                ApplicationName = "SERVICE-A", 
+                Environment = "prod", 
+                IsActive = true, 
+                CreatedAt = seedDate,
+                CreatedBy = "system"
+            }
         );
     }
 }

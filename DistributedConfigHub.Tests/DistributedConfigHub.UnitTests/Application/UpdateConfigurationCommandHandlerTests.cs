@@ -38,30 +38,37 @@ public class UpdateConfigurationCommandHandlerTests
         _messagePublisherMock.Verify(pub => pub.PublishConfigurationUpdatedEventAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Fact]
-    public async Task Handle_WhenRecordExists_ShouldUpdateAndPublishEventAndReturnTrue()
-    {
-        // Arrange
-        var command = new UpdateConfigurationCommand(Guid.NewGuid(), "SuccessValue");
-        var record = new ConfigurationRecord(
-            command.Id, 
-            "TestName", 
-            ConfigurationType.String, 
-            "OldValue", 
-            "TEST-APP", 
-            "prod", 
-            true);
+[Fact]
+public async Task Handle_WhenRecordExists_ShouldUpdateAndPublishEventAndReturnTrue()
+{
+    // Arrange
+    var record = new ConfigurationRecord(
+        "TestName", 
+        ConfigurationType.String, 
+        "OldValue", 
+        "TEST-APP", 
+        "prod");
 
-        _repositoryMock.Setup(repo => repo.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(record);
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+    var command = new UpdateConfigurationCommand(record.Id, "SuccessValue");
 
-        // Assert
-        result.Should().BeTrue();
-        record.Value.Should().Be("SuccessValue");
-        _repositoryMock.Verify(repo => repo.UpdateAsync(record, It.IsAny<CancellationToken>()), Times.Once);
-        _messagePublisherMock.Verify(pub => pub.PublishConfigurationUpdatedEventAsync("TEST-APP", "prod", It.IsAny<CancellationToken>()), Times.Once);
-    }
+    _repositoryMock.Setup(repo => repo.GetByIdAsync(record.Id, It.IsAny<CancellationToken>()))
+        .ReturnsAsync(record);
+
+    // Act
+    var result = await _handler.Handle(command, CancellationToken.None);
+
+    // Assert
+    result.Should().BeTrue();
+    
+    // Değer güncellenmiş mi?
+    record.Value.Should().Be("SuccessValue");
+    
+    // Kuralımız çalışmış mı?
+    record.UpdatedBy.Should().Be("admin"); 
+    
+    // Veritabanı ve RabbitMQ çağrılmış mı?
+    _repositoryMock.Verify(repo => repo.UpdateAsync(record, It.IsAny<CancellationToken>()), Times.Once);
+    _messagePublisherMock.Verify(pub => pub.PublishConfigurationUpdatedEventAsync("TEST-APP", "prod", It.IsAny<CancellationToken>()), Times.Once);
+}
 }
