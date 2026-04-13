@@ -10,4 +10,5 @@ public interface IConfigurationRepository
     Task AddAsync(ConfigurationRecord record, CancellationToken cancellationToken = default);
     Task UpdateAsync(ConfigurationRecord record, CancellationToken cancellationToken = default);
     Task DeleteAsync(ConfigurationRecord record, CancellationToken cancellationToken = default);
+    Task<ConfigurationRecord?> GetByNameAsync(string name, string applicationName, string environment, CancellationToken cancellationToken = default);
 }

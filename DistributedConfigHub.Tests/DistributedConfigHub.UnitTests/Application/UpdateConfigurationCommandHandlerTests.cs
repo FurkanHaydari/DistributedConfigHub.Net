@@ -22,7 +22,7 @@ public class UpdateConfigurationCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenRecordDoesNotExist_ShouldReturnFalse()
+    public async Task Handle_WhenRecordDoesNotExist_ShouldThrowKeyNotFoundException()
     {
         // Arrange
         var command = new UpdateConfigurationCommand(Guid.NewGuid(), "NewValue");
@@ -30,10 +30,10 @@ public class UpdateConfigurationCommandHandlerTests
             .ReturnsAsync((ConfigurationRecord?)null);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().BeFalse();
+        await act.Should().ThrowAsync<KeyNotFoundException>();
         _repositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<ConfigurationRecord>(), It.IsAny<CancellationToken>()), Times.Never);
         _messagePublisherMock.Verify(pub => pub.PublishConfigurationUpdatedEventAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }

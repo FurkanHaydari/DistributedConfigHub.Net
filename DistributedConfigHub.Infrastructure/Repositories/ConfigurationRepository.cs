@@ -49,4 +49,13 @@ public class ConfigurationRepository(ConfigDbContext dbContext) : IConfiguration
         dbContext.Configurations.Remove(record);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<ConfigurationRecord?> GetByNameAsync(string name, string applicationName, string environment, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Configurations
+            .FirstOrDefaultAsync(c => c.Name == name && 
+                                    c.ApplicationName == applicationName && 
+                                    c.Environment == environment, 
+                                cancellationToken);
+    }
 }
