@@ -25,7 +25,7 @@ public class UpdateConfigurationCommandHandlerTests
     public async Task Handle_WhenRecordDoesNotExist_ShouldThrowKeyNotFoundException()
     {
         // Arrange
-        var command = new UpdateConfigurationCommand(Guid.NewGuid(), "NewValue");
+        var command = new UpdateConfigurationCommand(Guid.NewGuid(), "NewValue", "TEST-APP");
         _repositoryMock.Setup(repo => repo.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ConfigurationRecord?)null);
 
@@ -50,7 +50,7 @@ public async Task Handle_WhenRecordExists_ShouldUpdateAndPublishEventAndReturnTr
         "prod");
 
 
-    var command = new UpdateConfigurationCommand(record.Id, "SuccessValue");
+    var command = new UpdateConfigurationCommand(record.Id, "SuccessValue", "TEST-APP");
 
     _repositoryMock.Setup(repo => repo.GetByIdAsync(record.Id, It.IsAny<CancellationToken>()))
         .ReturnsAsync(record);

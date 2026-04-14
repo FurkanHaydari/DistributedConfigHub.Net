@@ -25,6 +25,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             KeyNotFoundException => 
                 (StatusCodes.Status404NotFound, "Not Found", exception.Message),
 
+            // Tenant Isolation (Güvenlik) ihlali
+            UnauthorizedAccessException => 
+                (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
+
             // Duplicate (Çakışma) durumu: "Bu kayıt zaten var" -> 409 Conflict
             InvalidOperationException ex when ex.Message.Contains("already exists") => 
                 (StatusCodes.Status409Conflict, "Conflict", exception.Message),

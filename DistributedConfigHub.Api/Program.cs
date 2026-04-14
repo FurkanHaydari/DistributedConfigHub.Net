@@ -35,6 +35,7 @@ builder.Services.AddScoped<ApiKeyAuthorizeAttribute>();
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(IMessagePublisher).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(TenantAuthorizationBehavior<,>));
 });
 
 // Configure Database

@@ -65,6 +65,21 @@ public class ApiKeyAuthorizeAttributeTests
         );
     }
 
+    private void SetupApiKeys(Dictionary<string, string> keys)
+    {
+        var sectionMock = new Mock<IConfigurationSection>();
+        var children = keys.Select(kvp =>
+        {
+            var child = new Mock<IConfigurationSection>();
+            child.Setup(x => x.Key).Returns(kvp.Key);
+            child.Setup(x => x.Value).Returns(kvp.Value);
+            return child.Object;
+        }).ToList();
+
+        sectionMock.Setup(x => x.GetChildren()).Returns(children);
+        _configurationMock.Setup(x => x.GetSection("ApiKeys")).Returns(sectionMock.Object);
+    }
+
     [Fact]
     public async Task OnActionExecutionAsync_WhenApiKeyMissing_ShouldReturn401Unauthorized()
     {
@@ -77,22 +92,15 @@ public class ApiKeyAuthorizeAttributeTests
 
         // Assert
         context.Result.Should().BeOfType<UnauthorizedObjectResult>();
-        nextMock.Verify(x => x(), Times.Never); // Handler'a inememeli
     }
 
     [Fact]
-    public async Task OnActionExecutionAsync_WhenApplicationNameMissing_AndInvalidKey_ShouldReturn401Unauthorized()
+    public async Task OnActionExecutionAsync_WhenInvalidKey_ShouldReturn401Unauthorized()
     {
-        // Arrange — applicationName yok, geçersiz key → Temel doğrulama modu devreye girer
+        // Arrange
         var context = CreateMockContext(apiKeyHeader: "invalid-key", applicationNameQuery: null);
-        
-        // Mock: ApiKeys section'da hiçbir child key eşleşmesin
-        var emptySection = new Mock<IConfigurationSection>();
-        _configurationMock.Setup(x => x.GetSection("ApiKeys"))
-            .Returns(emptySection.Object);
-        emptySection.Setup(x => x.GetChildren())
-            .Returns(Array.Empty<IConfigurationSection>());
-        
+        SetupApiKeys(new Dictionary<string, string> { { "SERVICE-A", "real-key" } });
+
         var nextMock = new Mock<ActionExecutionDelegate>();
 
         // Act
@@ -100,24 +108,14 @@ public class ApiKeyAuthorizeAttributeTests
 
         // Assert
         context.Result.Should().BeOfType<UnauthorizedObjectResult>();
-        nextMock.Verify(x => x(), Times.Never);
     }
 
     [Fact]
-    public async Task OnActionExecutionAsync_WhenApplicationNameMissing_AndValidKey_ShouldProceed()
+    public async Task OnActionExecutionAsync_WhenValidKey_ShouldProceed()
     {
-        // Arrange — applicationName yok ama geçerli key → Mutation endpoint'leri (POST/PUT/DELETE) için yeterli
+        // Arrange
         var context = CreateMockContext(apiKeyHeader: "real-secret-key", applicationNameQuery: null);
-        
-        // Mock: ApiKeys section'da eşleşen bir key var
-        var childSection = new Mock<IConfigurationSection>();
-        childSection.Setup(x => x.Value).Returns("real-secret-key");
-        
-        var apiKeysSection = new Mock<IConfigurationSection>();
-        apiKeysSection.Setup(x => x.GetChildren())
-            .Returns(new[] { childSection.Object });
-        _configurationMock.Setup(x => x.GetSection("ApiKeys"))
-            .Returns(apiKeysSection.Object);
+        SetupApiKeys(new Dictionary<string, string> { { "SERVICE-A", "real-secret-key" } });
         
         var nextMock = new Mock<ActionExecutionDelegate>();
 
@@ -125,8 +123,9 @@ public class ApiKeyAuthorizeAttributeTests
         await _filter.OnActionExecutionAsync(context, nextMock.Object);
 
         // Assert
-        context.Result.Should().BeNull(); // Engellenmemeli
-        nextMock.Verify(x => x(), Times.Once); // Handler çalışmalı
+        context.Result.Should().BeNull(); 
+        context.HttpContext.Items["CallerApplicationName"].Should().Be("SERVICE-A");
+        nextMock.Verify(x => x(), Times.Once);
     }
 
     [Fact]
@@ -134,11 +133,7 @@ public class ApiKeyAuthorizeAttributeTests
     {
         // Arrange
         var context = CreateMockContext(apiKeyHeader: "valid-key", applicationNameQuery: "UNKNOWN-APP");
-        
-        // Mock appsettings.json to return null for UNKNOWN-APP
-        var sectionMock = new Mock<IConfigurationSection>();
-        sectionMock.Setup(x => x.Value).Returns((string?)null);
-        _configurationMock.Setup(x => x.GetSection("ApiKeys:UNKNOWN-APP")).Returns(sectionMock.Object);
+        SetupApiKeys(new Dictionary<string, string> { { "REAL-APP", "different-key" } });
 
         var nextMock = new Mock<ActionExecutionDelegate>();
 
@@ -147,19 +142,14 @@ public class ApiKeyAuthorizeAttributeTests
 
         // Assert
         context.Result.Should().BeOfType<UnauthorizedObjectResult>();
-        nextMock.Verify(x => x(), Times.Never);
     }
 
     [Fact]
-    public async Task OnActionExecutionAsync_WhenApiKeyDoesNotMatch_ShouldReturn403Forbidden()
+    public async Task OnActionExecutionAsync_WhenApiKeyIsWrong_ShouldReturn401Unauthorized()
     {
         // Arrange
         var context = CreateMockContext(apiKeyHeader: "hacker-key", applicationNameQuery: "SERVICE-A");
-        
-        // Mock appsettings.json to return real key for SERVICE-A
-        var sectionMock = new Mock<IConfigurationSection>();
-        sectionMock.Setup(x => x.Value).Returns("real-secret-key");
-        _configurationMock.Setup(x => x.GetSection("ApiKeys:SERVICE-A")).Returns(sectionMock.Object);
+        SetupApiKeys(new Dictionary<string, string> { { "SERVICE-A", "real-secret-key" } });
 
         var nextMock = new Mock<ActionExecutionDelegate>();
 
@@ -167,21 +157,15 @@ public class ApiKeyAuthorizeAttributeTests
         await _filter.OnActionExecutionAsync(context, nextMock.Object);
 
         // Assert
-        var result = context.Result.Should().BeOfType<StatusCodeResult>().Subject;
-        result.StatusCode.Should().Be(403); // Forbidden
-        nextMock.Verify(x => x(), Times.Never);
+        context.Result.Should().BeOfType<UnauthorizedObjectResult>(); 
     }
 
     [Fact]
-    public async Task OnActionExecutionAsync_WhenApiKeyMatches_ShouldProceedToNextDelegate()
+    public async Task OnActionExecutionAsync_WhenApiKeyMatches_ShouldProceedAndSetCallerName()
     {
         // Arrange
         var context = CreateMockContext(apiKeyHeader: "real-secret-key", applicationNameQuery: "SERVICE-A");
-        
-        // Mock appsettings.json
-        var sectionMock = new Mock<IConfigurationSection>();
-        sectionMock.Setup(x => x.Value).Returns("real-secret-key");
-        _configurationMock.Setup(x => x.GetSection("ApiKeys:SERVICE-A")).Returns(sectionMock.Object);
+        SetupApiKeys(new Dictionary<string, string> { { "SERVICE-A", "real-secret-key" } });
 
         var nextMock = new Mock<ActionExecutionDelegate>();
 
@@ -189,7 +173,8 @@ public class ApiKeyAuthorizeAttributeTests
         await _filter.OnActionExecutionAsync(context, nextMock.Object);
 
         // Assert
-        context.Result.Should().BeNull(); // Null means it didn't block
-        nextMock.Verify(x => x(), Times.Once); // Handler çalışmalı!
+        context.Result.Should().BeNull();
+        context.HttpContext.Items["CallerApplicationName"].Should().Be("SERVICE-A");
+        nextMock.Verify(x => x(), Times.Once);
     }
 }

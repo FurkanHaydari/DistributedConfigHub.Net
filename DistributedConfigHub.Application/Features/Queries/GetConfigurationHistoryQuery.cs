@@ -1,16 +1,25 @@
 using DistributedConfigHub.Application.Interfaces;
 using DistributedConfigHub.Domain.Entities;
-using FluentValidation;
 using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Queries;
 
-public record GetConfigurationHistoryQuery(Guid Id) : IRequest<IEnumerable<AuditLog>>;
+public record GetConfigurationHistoryQuery(Guid Id, string CallerApplicationName = "") : IRequest<IEnumerable<AuditLog>>;
 
-public class GetConfigurationHistoryQueryHandler(IAuditLogRepository auditLogRepository) : IRequestHandler<GetConfigurationHistoryQuery, IEnumerable<AuditLog>>
+public class GetConfigurationHistoryQueryHandler(
+    IAuditLogRepository auditLogRepository, 
+    IConfigurationRepository configurationRepository)
+    : IRequestHandler<GetConfigurationHistoryQuery, IEnumerable<AuditLog>>
 {
     public async Task<IEnumerable<AuditLog>> Handle(GetConfigurationHistoryQuery request, CancellationToken cancellationToken)
     {
+        var record = await configurationRepository.GetByIdAsync(request.Id, cancellationToken);
+        
+        if (record is null) throw new KeyNotFoundException($"Configuration with Id {request.Id} not found.");
+
+        if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException($"Güvenlik İhlali: '{request.CallerApplicationName}' servisi, '{record.ApplicationName}' servisine ait geçmiş logları okuyamaz!");
+
         return await auditLogRepository.GetHistoryAsync(request.Id, cancellationToken);
     }
 }

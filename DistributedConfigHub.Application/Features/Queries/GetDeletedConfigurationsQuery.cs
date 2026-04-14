@@ -4,7 +4,8 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Queries;
 
-public record GetDeletedConfigurationsQuery(string ApplicationName, string? Environment) : IRequest<IEnumerable<ConfigurationDto>>;
+public record GetDeletedConfigurationsQuery(string ApplicationName, string? Environment, string CallerApplicationName = "") 
+    : IRequest<IEnumerable<ConfigurationDto>>, ITenantIsolatedRequest;
 
 public class GetDeletedConfigurationsQueryHandler(IConfigurationRepository repository) : IRequestHandler<GetDeletedConfigurationsQuery, IEnumerable<ConfigurationDto>>
 {

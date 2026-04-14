@@ -5,7 +5,14 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Commands;
 
-public record CreateConfigurationCommand(string Name, ConfigurationType Type, string Value, string ApplicationName, string Environment) : IRequest<Guid>;
+public record CreateConfigurationCommand(
+    string Name, 
+    ConfigurationType Type, 
+    string Value, 
+    string ApplicationName, 
+    string Environment,
+    string CallerApplicationName = ""
+) : IRequest<Guid>, ITenantIsolatedRequest;
 
 public class CreateConfigurationCommandHandler(
     IConfigurationRepository repository, 

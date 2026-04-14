@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Commands;
 
-public record DeleteConfigurationCommand(Guid Id) : IRequest<bool>;
+public record DeleteConfigurationCommand(Guid Id, string CallerApplicationName = "") : IRequest<bool>;
 
 public class DeleteConfigurationCommandHandler(
     IConfigurationRepository repository, 
@@ -16,6 +16,9 @@ public class DeleteConfigurationCommandHandler(
         if (record is null) 
             throw new KeyNotFoundException($"Configuration with Id {request.Id} not found.");
 
+        if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException($"Güvenlik İhlali: {request.CallerApplicationName} servisi, {record.ApplicationName} servisine ait bir kaydı silemez!");
+    
         record.Deactivate("admin");
         await repository.UpdateAsync(record, cancellationToken);
 

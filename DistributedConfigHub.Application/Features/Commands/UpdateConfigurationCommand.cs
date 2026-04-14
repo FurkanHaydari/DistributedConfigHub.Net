@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Commands;
 
-public record UpdateConfigurationCommand(Guid Id, string Value) : IRequest<bool>;
+public record UpdateConfigurationCommand(Guid Id, string Value, string CallerApplicationName = "") : IRequest<bool>;
 
 public class UpdateConfigurationCommandHandler(
     IConfigurationRepository repository, 
@@ -16,6 +16,9 @@ public class UpdateConfigurationCommandHandler(
         if (record is null) 
             throw new KeyNotFoundException($"Configuration with Id {request.Id} not found.");
 
+        if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException($"Güvenlik İhlali: Yetkisiz erişim denemesi!");
+        
         record.UpdateValue(request.Value, "admin");
         await repository.UpdateAsync(record, cancellationToken);
         

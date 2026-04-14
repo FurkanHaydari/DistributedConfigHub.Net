@@ -4,7 +4,7 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Queries;
 
-public record GetConfigurationByIdQuery(Guid Id) : IRequest<ConfigurationDto?>;
+public record GetConfigurationByIdQuery(Guid Id, string CallerApplicationName = "") : IRequest<ConfigurationDto?>;
 
 public class GetConfigurationByIdQueryHandler(IConfigurationRepository repository) : IRequestHandler<GetConfigurationByIdQuery, ConfigurationDto?>
 {
@@ -13,6 +13,9 @@ public class GetConfigurationByIdQueryHandler(IConfigurationRepository repositor
         var record = await repository.GetByIdAsync(request.Id, cancellationToken);
         
         if (record is null) return null;
+
+        if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("Güvenlik İhlali: Başka bir servise ait konfigürasyonu okuyamazsınız!");
         
         return new ConfigurationDto(record.Id, record.Name, record.Type, record.Value, record.ApplicationName, record.Environment, record.IsActive);
     }

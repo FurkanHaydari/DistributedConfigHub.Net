@@ -4,7 +4,7 @@ using MediatR;
 
 namespace DistributedConfigHub.Application.Features.Commands;
 
-public record RollbackConfigurationCommand(Guid Id, Guid AuditLogId) : IRequest<bool>;
+public record RollbackConfigurationCommand(Guid Id, Guid AuditLogId, string CallerApplicationName = "") : IRequest<bool>;
 
 public class RollbackConfigurationCommandHandler(
     IConfigurationRepository repository, 
@@ -25,6 +25,9 @@ public class RollbackConfigurationCommandHandler(
 
         if (string.IsNullOrEmpty(auditLog.OldValues)) 
             throw new InvalidOperationException("No previous values found to rollback.");
+
+        if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException($"Güvenlik İhlali: Yetkisiz erişim denemesi!");
 
         var jsonDoc = JsonDocument.Parse(auditLog.OldValues);
         bool hasChanges = false;
