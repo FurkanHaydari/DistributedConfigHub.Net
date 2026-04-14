@@ -18,7 +18,7 @@
     },
     {
       "key": "apiKey",
-      "value": "enterprise-demo-key",
+      "value": "service-a-secret-key",
       "type": "string"
     },
     {
@@ -48,8 +48,12 @@
                 "header": [],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Health",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Health"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Health"
+                  ]
                 },
                 "description": "PostgreSQL ve RabbitMQ bağlantı durumlarını, uptime bilgisini ve kayıtlı servislerin listesini döner.\n\n**Başarılı yanıtlar:** 200 OK\n**Hatalı yanıtlar:** 503 Service Unavailable (bağlantı sorunu)"
               },
@@ -90,8 +94,12 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ],
                   "query": [
                     {
                       "key": "applicationName",
@@ -123,8 +131,13 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/deleted?applicationName=SERVICE-A",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "deleted"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "deleted"
+                  ],
                   "query": [
                     {
                       "key": "applicationName",
@@ -154,8 +167,13 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}"
+                  ]
                 },
                 "description": "Tekil konfigürasyon kaydını ID ile getirir.\n\n> ⚠️ Önce \"Get All Configurations\" çalıştırarak `configId` değişkenini set edin."
               },
@@ -203,8 +221,12 @@
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ]
                 },
                 "description": "Yeni bir konfigürasyon kaydı oluşturur.\n\n**Body:**\n- `name`: Konfigürasyon adı\n- `type`: 0=String, 1=Int, 2=Double, 3=Boolean\n- `value`: Değer (string olarak)\n- `applicationName`: Hedef servis adı\n- `environment`: Hedef ortam\n\n> 💡 Oluşturulan ID otomatik olarak `configId` değişkenine kaydedilir."
               },
@@ -237,8 +259,12 @@
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ]
                 },
                 "description": "Boolean tipinde konfigürasyon oluşturma örneği.\n\n- `type: 3` → Boolean"
               },
@@ -271,8 +297,12 @@
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ]
                 },
                 "description": "Int tipinde konfigürasyon oluşturma örneği.\n\n- `type: 1` → Int"
               },
@@ -305,8 +335,13 @@
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}"
+                  ]
                 },
                 "description": "Mevcut bir konfigürasyonun değerini günceller.\n\nGüncelleme anında RabbitMQ üzerinden tüm subscriber'lara bildirim gönderilir.\n\n> ⚠️ URL'deki `id` ile body'deki `id` aynı olmalıdır."
               },
@@ -325,8 +360,13 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}"
+                  ]
                 },
                 "description": "Konfigürasyonu soft-delete yapar (IsActive = false).\n\n**Yanıt:** 204 No Content"
               },
@@ -366,8 +406,14 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}/history",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}", "history"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}",
+                    "history"
+                  ]
                 },
                 "description": "Belirtilen konfigürasyonun tüm değişiklik geçmişini (audit log) döner.\n\nHer kayıt için: OperationType (INSERT/UPDATE/DELETE), OldValue, NewValue, Timestamp.\n\n> 💡 İlk audit log ID'si otomatik olarak `auditLogId` değişkenine kaydedilir."
               },
@@ -386,8 +432,15 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}/rollback/{{auditLogId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}", "rollback", "{{auditLogId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}",
+                    "rollback",
+                    "{{auditLogId}}"
+                  ]
                 },
                 "description": "Konfigürasyonu belirtilen audit log noktasına geri alır.\n\n**Akış:**\n1. Önce history'den hedef `auditLogId`'yi belirleyin\n2. Bu endpoint ile o noktaya rollback yapın\n3. RabbitMQ üzerinden tüm subscriber'lar bilgilendirilir\n\n> ⚠️ Önce \"Get Configuration History\" çalıştırarak `auditLogId` değişkenini set edin."
               },
@@ -400,14 +453,18 @@
           "description": "API anahtarı doğrulama testleri.",
           "item": [
             {
-              "name": "❌ Request Without API Key (403)",
+              "name": "❌ Request Without API Key (401)",
               "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ],
                   "query": [
                     {
                       "key": "applicationName",
@@ -415,12 +472,12 @@
                     }
                   ]
                 },
-                "description": "API anahtarı olmadan istek gönderir.\n\n**Beklenen:** 403 Forbidden"
+                "description": "API anahtarı olmadan istek gönderir.\n\n**Beklenen:** 401 Unauthorized"
               },
               "response": []
             },
             {
-              "name": "❌ Request With Wrong API Key (403)",
+              "name": "❌ Request With Wrong API Key (401)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -432,8 +489,12 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ],
                   "query": [
                     {
                       "key": "applicationName",
@@ -441,7 +502,7 @@
                     }
                   ]
                 },
-                "description": "Yanlış API anahtarı ile istek gönderir.\n\n**Beklenen:** 403 Forbidden"
+                "description": "Yanlış API anahtarı ile istek gönderir.\n\n**Beklenen:** 401 Unauthorized"
               },
               "response": []
             }
@@ -460,8 +521,12 @@
             "header": [],
             "url": {
               "raw": "{{consumerBaseUrl}}/Products",
-              "host": ["{{consumerBaseUrl}}"],
-              "path": ["Products"]
+              "host": [
+                "{{consumerBaseUrl}}"
+              ],
+              "path": [
+                "Products"
+              ]
             },
             "description": "Aktif veritabanındaki tüm ürünleri listeler.\n\n- `db_alpha` aktifken: 5 adet Alpha ürünü\n- `db_beta` aktifken: 4 adet Beta ürünü\n\n> 💡 Hot-swap sonrası ürünlerin değiştiğini doğrulamak için kullanın."
           },
@@ -474,8 +539,12 @@
             "header": [],
             "url": {
               "raw": "{{consumerBaseUrl}}/Test",
-              "host": ["{{consumerBaseUrl}}"],
-              "path": ["Test"]
+              "host": [
+                "{{consumerBaseUrl}}"
+              ],
+              "path": [
+                "Test"
+              ]
             },
             "description": "SDK'dan okunan canlı konfigürasyon durumunu döner.\n\n**Yanıt içeriği:**\n- `uptime`: Uygulamanın çalışma süresi\n- `startTime`: Başlangıç zamanı\n- `environment`: ASP.NET Core ve Config Hub ortam bilgisi\n- `configs.isMaintenanceModeEnabled`: Bakım modu durumu\n- `configs.database`: Aktif veritabanı connection string'i\n- `configs.paymentApiUrl`: Harici ödeme API URL'i\n- `configs.maxConcurrentTransactions`: Maksimum eşzamanlı işlem sayısı"
           },
@@ -488,8 +557,12 @@
             "header": [],
             "url": {
               "raw": "{{consumerBaseUrl}}/ServiceHealth",
-              "host": ["{{consumerBaseUrl}}"],
-              "path": ["ServiceHealth"]
+              "host": [
+                "{{consumerBaseUrl}}"
+              ],
+              "path": [
+                "ServiceHealth"
+              ]
             },
             "description": "Consumer uygulamasının sağlık durumunu bildirir.\n\n**Yanıt içeriği:**\n- `status`: Healthy ✅ / Degraded ⚠️\n- `uptime`: Çalışma süresi (restart kontrolü)\n- `runtimeConfiguration.mainDatabase`: SDK'dan okunan aktif DB bağlantısı\n- `runtimeConfiguration.resolvedDatabaseName`: Gerçek bağlanan DB adı\n- `runtimeConfiguration.databaseStatus`: Bağlantı durumu\n\n> 🎯 Hot-swap sonrası `resolvedDatabaseName` değiştiğini doğrulamak için kullanın."
           },
@@ -534,11 +607,21 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A&environment=dev",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ],
                   "query": [
-                    { "key": "applicationName", "value": "SERVICE-A" },
-                    { "key": "environment", "value": "dev" }
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A"
+                    },
+                    {
+                      "key": "environment",
+                      "value": "dev"
+                    }
                   ]
                 }
               },
@@ -563,12 +646,21 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"id\": \"{{configId}}\",\n  \"value\": \"true\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}"
+                  ]
                 }
               },
               "response": []
@@ -580,8 +672,12 @@
                 "header": [],
                 "url": {
                   "raw": "{{consumerBaseUrl}}/Test",
-                  "host": ["{{consumerBaseUrl}}"],
-                  "path": ["Test"]
+                  "host": [
+                    "{{consumerBaseUrl}}"
+                  ],
+                  "path": [
+                    "Test"
+                  ]
                 },
                 "description": "configs.isMaintenanceModeEnabled = true olmalı"
               },
@@ -622,11 +718,21 @@
                 ],
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations?applicationName=SERVICE-A&environment=dev",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations"],
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations"
+                  ],
                   "query": [
-                    { "key": "applicationName", "value": "SERVICE-A" },
-                    { "key": "environment", "value": "dev" }
+                    {
+                      "key": "applicationName",
+                      "value": "SERVICE-A"
+                    },
+                    {
+                      "key": "environment",
+                      "value": "dev"
+                    }
                   ]
                 }
               },
@@ -651,12 +757,21 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"id\": \"{{configId}}\",\n  \"value\": \"Host=postgres;Database=db_beta;Username=postgres;Password=postgres\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
                 "url": {
                   "raw": "{{configHubBaseUrl}}/Configurations/{{configId}}",
-                  "host": ["{{configHubBaseUrl}}"],
-                  "path": ["Configurations", "{{configId}}"]
+                  "host": [
+                    "{{configHubBaseUrl}}"
+                  ],
+                  "path": [
+                    "Configurations",
+                    "{{configId}}"
+                  ]
                 }
               },
               "response": []
@@ -668,8 +783,12 @@
                 "header": [],
                 "url": {
                   "raw": "{{consumerBaseUrl}}/Products",
-                  "host": ["{{consumerBaseUrl}}"],
-                  "path": ["Products"]
+                  "host": [
+                    "{{consumerBaseUrl}}"
+                  ],
+                  "path": [
+                    "Products"
+                  ]
                 },
                 "description": "Artık Beta ürünleri (Beta Smartwatch Ultra, Beta Tablet Air, ...) görünmeli."
               },
@@ -682,8 +801,12 @@
                 "header": [],
                 "url": {
                   "raw": "{{consumerBaseUrl}}/ServiceHealth",
-                  "host": ["{{consumerBaseUrl}}"],
-                  "path": ["ServiceHealth"]
+                  "host": [
+                    "{{consumerBaseUrl}}"
+                  ],
+                  "path": [
+                    "ServiceHealth"
+                  ]
                 },
                 "description": "Uptime artmaya devam etmeli — uygulama restart olmadı!"
               },

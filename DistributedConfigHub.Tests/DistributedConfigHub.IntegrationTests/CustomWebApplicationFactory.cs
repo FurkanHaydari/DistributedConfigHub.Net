@@ -24,7 +24,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
     };
 
-    public HttpClient CreateAuthenticatedClient(string apiKey = "enterprise-demo-key")
+    public HttpClient CreateAuthenticatedClient(string apiKey = "service-a-secret-key")
     {
         var client = CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
