@@ -1,8 +1,10 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using DistributedConfigHub.Client.Interfaces;
+using DistributedConfigHub.Client.Models;
 
-namespace DistributedConfigHub.Client;
+namespace DistributedConfigHub.Client.Services;
 
 public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions options, ILogger<ConfigSdkService> logger) : IConfigSdkService
 {

@@ -3,8 +3,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using DistributedConfigHub.Client.Interfaces;
+using DistributedConfigHub.Client.Models;
 
-namespace DistributedConfigHub.Client;
+namespace DistributedConfigHub.Client.Services;
 
 public class RabbitMqSubscriberHostedService(
     DistributedConfigOptions options, 

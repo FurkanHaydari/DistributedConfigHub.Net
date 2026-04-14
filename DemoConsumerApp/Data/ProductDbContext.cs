@@ -1,5 +1,5 @@
 using DemoConsumerApp.Models;
-using DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoConsumerApp.Data;

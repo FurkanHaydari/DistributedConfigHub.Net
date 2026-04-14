@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
-using DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Models;
+using DistributedConfigHub.Client.Services;
+using DistributedConfigHub.Client.Interfaces;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;

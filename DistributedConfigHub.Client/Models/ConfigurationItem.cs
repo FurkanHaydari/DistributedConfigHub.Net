@@ -1,4 +1,4 @@
-namespace DistributedConfigHub.Client;
+namespace DistributedConfigHub.Client.Models;
 
 public record ConfigurationItem(
     string Name,

@@ -1,4 +1,6 @@
 using DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Interfaces;
+using DistributedConfigHub.Client.Models;
 using DemoConsumerApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);

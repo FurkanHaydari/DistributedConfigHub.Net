@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using DemoConsumerApp.Data;
-using DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

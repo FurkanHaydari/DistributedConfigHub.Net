@@ -1,4 +1,6 @@
-namespace DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Interfaces;
+
+namespace DistributedConfigHub.Client.Models;
 
 public class DistributedConfigOptions
 {

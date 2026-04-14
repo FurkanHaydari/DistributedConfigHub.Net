@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using DistributedConfigHub.Client;
+using DistributedConfigHub.Client.Interfaces;
+using DistributedConfigHub.Client.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoConsumerApp.Controllers;

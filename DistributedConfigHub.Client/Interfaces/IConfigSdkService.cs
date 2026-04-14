@@ -1,4 +1,4 @@
-namespace DistributedConfigHub.Client;
+namespace DistributedConfigHub.Client.Interfaces;
 
 public interface IConfigSdkService
 {
