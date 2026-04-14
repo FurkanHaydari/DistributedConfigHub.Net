@@ -156,16 +156,28 @@ Sistemde "Sıfır Güven" (Zero Trust) prensibi uygulanmıştır:
 - **Authorization (MediatR Pipeline):** `TenantAuthorizationBehavior` kullanılarak, bir servisin başka bir servisin verisine erişme denemesi daha iş mantığına (Handler) ulaşmadan **"Zero-Database-Trip"** yöntemiyle engellenir.
 - **Double-Trip Protection:** ID tabanlı isteklerde (Update/Delete) performans kaybını önlemek için yetki kontrolü Handler seviyesinde yapılarak veritabanına mükerrer gitmekten (Double-Trip Anti-pattern) kaçınılmıştır.
 
-### 4. Resilience (Dayanıklılık) — Fallback Strategy
-Merkezi sistemlerin "Single Point of Failure" (SPOF) riskine karşı şu önlemler alınmıştır:
-- **Local Snapshot:** SDK, API'den aldığı son başarılı konfigürasyonu asenkron olarak `local-fallback-config.json` dosyasına yazar.
-- **Graceful Degradation:** Merkezi API veya RabbitMQ çökse bile, istemci uygulamalar son bilinen "iyi" değerlerle (disk üzerinden) kesintisiz çalışmaya devam eder.
+### 4. Resilience (Dayanıklılık) — Last Known Good Configuration (LKGC)
+Merkezi sistemlerin "Single Point of Failure" (SPOF) riskine karşı çok katmanlı bir koruma stratejisi uygulanmıştır:
+- **3-Kademeli Retry (Yeniden Deneme):** SDK, API'ye ulaşamadığında hemen pes etmez; üstel bekleme (exponential backoff) ile 3 kez tekrar dener.
+- **Hafıza Önceliği (Memory-over-Disk):** API hatası veya veritabanı kesintisi anında, eğer SDK hafızasında (Memory) hali hazırda çalışan bir veri varsa **asla silinmez/bozulmaz.** "Eski ama çalışan veri, hiç yoktan iyidir" prensibi (Graceful Stay) uygulanır.
+- **Boş Veri Koruması (Empty Response Guard):** API 200 OK dönse bile, veritabanı bağlantısı koptuğu için "boş" bir liste gönderirse; SDK bu veriyi "şüpheli" kabul eder ve mevcut sağlıklı cache'ini korur.
+- **Local Snapshot & Graceful Degradation:** Sadece ilk açılışta API kapalıysa diskteki asenkron yedek (`local-fallback-config.json`) devreye girer. Bu sayede merkez çökse bile istemci "son iyi değerlerle" (Last Known Good) ayağa kalkabilir.
+
+> [!NOTE]
+> **Cache Hiyerarşisi:** SDK, performans için "RAM > Disk" hiyerarşisini kullanır. API kapalıyken RAM'de veri varsa diske gidilmez (Disk I/O maliyetinden kaçınılır). Disk snapshot'ları sadece hafızanın boş olduğu "Cold Start" senaryoları (Örn: Gece 03:00'te merkez API çöktü, consumer app de o an restart yedi vb.) için sigortadır.
 
 ### 5. Yapısal Tasarım: Neden Clean Architecture & CQRS?
 Sistemin sürdürülebilirliği, büyüme potansiyeli ve test edilebilirliği için merkezde iş kurallarının olduğu, bağımlılıkların dışarıdan içeriye doğru aktığı Clean Architecture benimsenmiştir.
 - **Bağımlılıkların İzolasyonu (Separation of Concerns):** `Domain` ve `Application` katmanları hiçbir altyapı aracına (EF Core, RabbitMQ, HTTP) bağımlı değildir. Bu sayede yarın PostgreSQL yerine başka bir veritabanına geçilmek istense bile iş mantığında (Business Logic) tek satır kod değişmez.
 - **Odaklanmış İş Mantığı (CQRS):** `MediatR` kullanılarak okuma (Query) ve yazma (Command) işlemleri birbirinden ayrılmıştır. Bu yaklaşım, sınıfların (Handler) yalnızca tek bir amaca hizmet etmesini (Single Responsibility) sağlar ve spagetti kod oluşumunu engeller.
 - **Yüksek Test Edilebilirlik:** İş mantığı veritabanı veya network altyapısına sıkı sıkıya bağlı (tightly-coupled) olmadığı için, dış servisleri `Mock`'layarak Unit Test yazmak son derece hızlı ve güvenilirdir.
+
+### 6. Bellek Yönetimi: Neden ConcurrentDictionary & Volatile? (High-Performance Caching)
+SDK içerisinde konfigürasyonlar bellekte tutulurken "Lock-Free Read" (Kilitsiz Okuma) prensibi uygulanmıştır:
+- **ConcurrentDictionary:** Aynı anda binlerce thread'in sözlükten veri okumasını, yazma (update) operasyonunu engellemeden sağlar.
+- **Volatile & Atomic Swap:** `_cache` referansı `volatile` olarak işaretlenmiştir. Yeni konfigürasyonlar API'den geldiğinde, eski sözlük üzerinde işlem yapmak yerine yeni bir sözlük oluşturulur ve referans **atomik** olarak değiştirilir. Bu sayede okuyucu thread'ler asla "yarım dolmuş" veya "bozuk" bir veri görmez.
+- **SemaphoreSlim:** Konfigürasyon yenileme (`Reload`) işlemi sırasında sistemin gereksiz yere birden fazla API isteği atmasını engellemek için kullanılmıştır. Okumalar kilitsizdir, ancak yazmalar (güncelleme anı) kontrollü bir şekilde serialize edilir.
+
 
 ---
 
@@ -358,7 +370,7 @@ X-Api-Key: service-a-secret-key
 # Tüm testleri çalıştır
 dotnet test
 
-# Sonuç: 15/15 Test Passed ✅
+# Sonuç: 17/17 Test Passed ✅
 ```
 
 | Test Kategorisi / Sınıfı | Kapsam |

@@ -55,34 +55,74 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
         try
         {
             var url = $"Configurations?applicationName={options.ApplicationName}&environment={options.Environment}";
-            var response = await httpClient.GetAsync(url, cancellationToken);
             
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage? response = null;
+            Exception? lastException = null;
+
+            // 1. Retry Mechanism (3 attempts) - Kademeli bekleme ile
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                try
+                {
+                    response = await httpClient.GetAsync(url, cancellationToken);
+                    if (response.IsSuccessStatusCode) break;
+                    
+                    logger.LogWarning("API request failed (Attempt {Attempt}/3). Status: {StatusCode}", attempt, response.StatusCode);
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    logger.LogWarning(ex, "API request threw exception (Attempt {Attempt}/3).", attempt);
+                }
+
+                if (attempt < 3) await Task.Delay(1000 * attempt, cancellationToken); 
+            }
+
+            // 2. Success Case - Geçerli veri gelip gelmediği kontrolü
+            if (response != null && response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var items = JsonSerializer.Deserialize<List<ConfigurationItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 
-                if (items is not null)
+                // LKGC Guard: Boş veri gelirse ve elimizde zaten veri varsa, "Son Bilinen İyi Veriyi" (Last Known Good) koru
+                if (items == null || items.Count == 0)
+                {
+                    if (!_cache.IsEmpty)
+                    {
+                        logger.LogWarning("API returned empty configurations. Keeping the last known good memory cache to prevent data loss.");
+                        return;
+                    }
+                }
+                else
                 {
                     SwapCache(items);
                     
+                    // Fallback dosyasını sadece API'den başarılı ve dolu veri geldiğinde güncelle
                     await File.WriteAllTextAsync(options.FallbackFilePath, content, cancellationToken);
                     logger.LogInformation("Configurations successfully loaded from API and cached to {FallbackFile}.", options.FallbackFilePath);
                     return;
                 }
             }
             
-            logger.LogWarning("API responded with {StatusCode}. Attempting to read from local fallback.", response.StatusCode);
-            await ReadFromFallbackAsync(cancellationToken);
+            // 3. Failure Case - API başarısız ise hafızadaki veriyi koru veya fallback'e bak
+            if (!_cache.IsEmpty)
+            {
+                logger.LogWarning("API fetch failed after retries. Keeping the existing memory cache to ensure service continuity. Last error: {Error}", 
+                    lastException?.Message ?? response?.StatusCode.ToString());
+            }
+            else
+            {
+                logger.LogWarning("API fetch failed and memory cache is empty. Attempting to use local fallback file.");
+                await ReadFromFallbackAsync(cancellationToken);
+            }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to fetch configurations from API. Attempting to use local fallback.");
-            await ReadFromFallbackAsync(cancellationToken);
+            logger.LogError(ex, "Unexpected error during configuration reload.");
         }
         finally
         {
-            // Kiliti serbest bırak
+            // Kilidi serbest bırak
             _reloadLock.Release();
         }
     }
