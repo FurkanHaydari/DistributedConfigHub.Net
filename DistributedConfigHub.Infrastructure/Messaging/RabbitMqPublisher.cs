@@ -34,6 +34,9 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
             routingKey: routingKey,
             body: body,
             cancellationToken: cancellationToken);
+
+        _logger.LogInformation("Published config update to exchange '{ExchangeName}' for application '{ApplicationName}' on environment '{Environment}'", 
+            exchangeName, applicationName, environment);
     }
 
     private async Task<IChannel> GetOrCreateChannelAsync(CancellationToken cancellationToken)
