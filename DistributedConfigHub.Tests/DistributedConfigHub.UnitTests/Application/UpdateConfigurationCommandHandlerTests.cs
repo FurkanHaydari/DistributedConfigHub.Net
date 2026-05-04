@@ -61,13 +61,13 @@ public async Task Handle_WhenRecordExists_ShouldUpdateAndPublishEventAndReturnTr
     // Assert
     result.Should().BeTrue();
     
-    // Değer güncellenmiş mi?
+    // Is the value updated?
     record.Value.Should().Be("SuccessValue");
     
-    // Kuralımız çalışmış mı?
+    // Did our rule execute?
     record.UpdatedBy.Should().Be("admin"); 
     
-    // Veritabanı ve RabbitMQ çağrılmış mı?
+    // Were Database and RabbitMQ called?
     _repositoryMock.Verify(repo => repo.UpdateAsync(record, It.IsAny<CancellationToken>()), Times.Once);
     _messagePublisherMock.Verify(pub => pub.PublishConfigurationUpdatedEventAsync("TEST-APP", "prod", It.IsAny<CancellationToken>()), Times.Once);
 }

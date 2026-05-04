@@ -49,10 +49,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     {
         builder.ConfigureTestServices(services =>
         {
-            // Orijinal (Program.cs içerisindeki) veritabanı ayarını siliyoruz ki dışarıya sızmasın
+            // We remove the original database setting (in Program.cs) to prevent leakage
             services.RemoveAll<DbContextOptions<ConfigDbContext>>();
 
-            // Testcontainer üzerinden izole çalışacak tertemiz DB ayarı
+            // Clean DB setting to run isolated over Testcontainers
             services.AddSingleton<AuditInterceptor>();
             services.AddDbContext<ConfigDbContext>((sp, options) =>
             {
@@ -63,7 +63,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
-            // Migration ve tohumlu veriler sadece bu container DB üzerinden döner.
+            // Migration and seed data only run over this container DB.
             db.Database.Migrate();
         });
 

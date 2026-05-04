@@ -23,13 +23,13 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 
             if (failures.Count > 0)
             {
-                // FluentValidation'ın hatalarını kendi formatımıza sarıyoruz ki 
-                // api tarafında standartlaştırabilelim
+                // We wrap FluentValidation errors into our own format so that 
+                // we can standardize them on the API side
                 throw new ValidationException(failures);
             }
         }
 
-        // Kuraldan başarıyla geçerse veya hiç kural yoksa, komutu Handler sınıfına ilet (Next)
+        // If the rule passes successfully or there are no rules, forward the command to the Handler (Next)
         return await next();
     }
 }

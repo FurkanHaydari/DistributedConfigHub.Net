@@ -9,24 +9,24 @@
 
 # 🚀 DistributedConfigHub
 
-Merkezi, güvenli ve gerçek zamanlı (event-driven) bir konfigürasyon yönetim sistemi. Bu proje, mikroservis mimarilerinde konfigürasyon değişikliklerinin servis kesintisi (restart) gerektirmeden, izole ve güvenli bir şekilde yönetilmesini sağlar.
+A centralized, secure, and real-time (event-driven) configuration management system. This project enables configuration changes in microservice architectures to be managed safely and in isolation without requiring service restarts (zero-downtime).
 
-> **Tek komutla ayağa kalkar:** `docker compose up --build -d`
-
----
-
-## 🛠️ Temel Özellikler
-- [x] **Message Broker:** RabbitMQ Direct Exchange ile düşük ağ maliyeti.
-- [x] **Environment Desteği:** Dev, Staging, Prod bazlı kayıt yönetimi.
-- [x] **Audit & Rollback:** Tüm değişikliklerin geçmişi ve tek tıkla eski sürüme dönüş.
-- [x] **Docker Compose:** Tüm ekosistemi (DB, MQ, API, Consumer) tek komutla ayağa kaldırma.
-- [x] **Zero Downtime:** Servisleri yeniden başlatmadan konfigürasyon güncelleme.
+> **Starts with a single command:** `docker compose up --build -d`
 
 ---
 
-## 📐 Mimari (Clean Architecture + CQRS)
+## 🛠️ Key Features
+- [x] **Message Broker:** Low network overhead using RabbitMQ Direct Exchange.
+- [x] **Environment Support:** Environment-based (Dev, Staging, Prod) record management.
+- [x] **Audit & Rollback:** Complete history of all changes with one-click rollback.
+- [x] **Docker Compose:** Spin up the entire ecosystem (DB, MQ, API, Consumer) with a single command.
+- [x] **Zero Downtime:** Update configurations without restarting services.
 
-```
+---
+
+## 📐 Architecture (Clean Architecture + CQRS)
+
+```text
 ┌────────────────────────────────────────────────────────────────────┐
 │                🌐 🌐 🌐 Admin Panel (SPA) 🌐 🌐 🌐                   │
 │                      http://localhost:5173                         │
@@ -69,66 +69,66 @@ Merkezi, güvenli ve gerçek zamanlı (event-driven) bir konfigürasyon yönetim
 ```
 
 
-### Proje Katmanları
+### Project Layers
 
-| Katman | Sorumluluk |
+| Layer | Responsibility |
 |---|---|
-| **Domain** | Entity'ler (`ConfigurationRecord`, `AuditLog`), Enum'lar, `BaseAuditableEntity` |
-| **Application** | CQRS Command/Query'ler, Validator'lar, Interface'ler, DTO'lar |
-| **Infrastructure** | EF Core DbContext, Repository'ler, RabbitMQ Publisher, Audit Interceptor |
-| **Api** | Controller'lar, Action Filter (API Key), Exception Handler'lar, Admin Panel |
-| **Client (SDK)** | Consumer'lar için NuGet-ready kütüphane: config cache, RabbitMQ subscriber, fallback |
-| **DemoConsumerApp** | SDK'yı kullanan örnek servis: canlı güncelleme demo'su |
-| **Tests** | Unit + Integration testler (xUnit, Testcontainers) |
+| **Domain** | Entities (`ConfigurationRecord`, `AuditLog`), Enums, `BaseAuditableEntity` |
+| **Application** | CQRS Command/Queries, Validators, Interfaces, DTOs |
+| **Infrastructure** | EF Core DbContext, Repositories, RabbitMQ Publisher, Audit Interceptor |
+| **Api** | Controllers, Action Filter (API Key), Exception Handlers, Admin Panel |
+| **Client (SDK)** | NuGet-ready library for consumers: config cache, RabbitMQ subscriber, fallback |
+| **DemoConsumerApp** | Example service using the SDK: live update demo |
+| **Tests** | Unit + Integration tests (xUnit, Testcontainers) |
 
 ---
 
-### 📁 Klasör Yapısı
+### 📁 Folder Structure
 
-```
+```text
 DistributedConfigHub.Net/
 ├── 📦 DistributedConfigHub.Api/           # REST API + Admin Panel
 │   ├── Controllers/                       # Configurations, Health
-│   ├── Filters/                           # ApiKeyAuthorizeAttribute (X-Api-Key Güvenliği)
+│   ├── Filters/                           # ApiKeyAuthorizeAttribute (X-Api-Key Security)
 │   ├── Infrastructure/ExceptionHandling/  # GlobalExceptionHandler
 │   └── wwwroot/                           # Admin Panel (Pure JS/CSS Login & Dashboard)
 │
-├── 📦 DistributedConfigHub.Application/   # CQRS + İş Mantığı
+├── 📦 DistributedConfigHub.Application/   # CQRS + Business Logic
 │   ├── Features/Commands/                 # Create, Update, Delete, Rollback Handlers
 │   ├── Features/Queries/                  # GetList, GetById, GetDeleted, GetHistory Handlers
 │   ├── Behaviors/                         # Validation & TenantAuthorization (Pipeline)
 │   ├── Exceptions/                        # Custom Application Exceptions
-│   ├── DTOs/                              # Veri Transfer Nesneleri (ConfigurationDto)
-│   └── Interfaces/                        # Repository, Messaging ve Context Sözleşmeleri
+│   ├── DTOs/                              # Data Transfer Objects (ConfigurationDto)
+│   └── Interfaces/                        # Repository, Messaging and Context Contracts
 │
-├── 📦 DistributedConfigHub.Domain/        # Domain Modeli (Zero Dependency)
+├── 📦 DistributedConfigHub.Domain/        # Domain Model (Zero Dependency)
 │   ├── Entities/                          # ConfigurationRecord, AuditLog, BaseAuditableEntity
 │   └── Enums/                             # ConfigurationType (Numeric/JSON/Bool/etc)
 │
-├── 📦 DistributedConfigHub.Infrastructure/# Altyapı ve Veri Erişim
+├── 📦 DistributedConfigHub.Infrastructure/# Infrastructure and Data Access
 │   ├── Data/                              # ConfigDbContext, FluentAPI Configs, Interceptors
-│   ├── Migrations/                        # PostgreSQL Veritabanı Şemaları
-│   ├── Repositories/                      # EF Core Repository Gerçekleştirimleri
+│   ├── Migrations/                        # PostgreSQL Database Schemas
+│   ├── Repositories/                      # EF Core Repository Implementations
 │   └── Messaging/                         # RabbitMqPublisher (Signaling Logic)
 │
-├── 📦 DistributedConfigHub.Client/        # Akıllı SDK (Consumer-Side)
-│   ├── Interfaces/                        # IConfigSdkService (Sözleşmeler)
-│   ├── Models/                            # DTO'lar ve Ayarlar (Item, Options)
-│   ├── Services/                          # Uygulama Mantığı (SDK, Subscriber)
-│   └── ServiceCollectionExtensions.cs     # DI Kayıt Mekanizması
+├── 📦 DistributedConfigHub.Client/        # Smart SDK (Consumer-Side)
+│   ├── Interfaces/                        # IConfigSdkService (Contracts)
+│   ├── Models/                            # DTOs and Settings (Item, Options)
+│   ├── Services/                          # Application Logic (SDK, Subscriber)
+│   └── ServiceCollectionExtensions.cs     # DI Registration Mechanism
 │
-├── 📦 DemoConsumerApp/                    # "Sıfır Kesinti" Uygulama Örneği
-│   ├── Controllers/                       # ServiceHealth (DB & SDK Sağlık Kontrolü)
+├── 📦 DemoConsumerApp/                    # "Zero Downtime" Example Application
+│   ├── Controllers/                       # ServiceHealth (DB & SDK Health Check)
 │   ├── Data/                              # ProductDbContext & DatabaseInitializer
-│   └── local-fallback-config.json         # API Çökünce Kullanılan Yedek Konfigürasyon
+│   └── local-fallback-config.json         # Backup Configuration used when API is down
 │
-├── 📦 DistributedConfigHub.Tests/         # Test Süreçleri
-│   ├── DistributedConfigHub.UnitTests     # Moq Tabanlı Mantık Testleri
-│   └── DistributedConfigHub.IntegrationTests # Testcontainers (Docker) Bazlı Uçtan Uca Testler
+├── 📦 DistributedConfigHub.Tests/         # Test Processes
+│   ├── DistributedConfigHub.UnitTests     # Moq-Based Logic Tests
+│   └── DistributedConfigHub.IntegrationTests # Testcontainers (Docker) Based End-to-End Tests
 │
-├── 📂 docs/                               # Dokümantasyon Varlıkları
-│   ├── ConfigHub.postman_collection.json  # Güncel Postman Koleksiyonu
-│   └── assets/                            # Demo GIF ve Ekran Görüntüleri
+├── 📂 docs/                               # Documentation Assets
+│   ├── ConfigHub.postman_collection.json  # Up-to-date Postman Collection
+│   └── assets/                            # Demo GIF and Screenshots
 │
 ├── 🐳 docker-compose.yml                  # Full-stack Orchestration
 └── 📄 README.md
@@ -136,199 +136,167 @@ DistributedConfigHub.Net/
 ```
 ---
 
-## 🏗️ Mimari Tercihler ve Teknik Gerekçeler
+## 🏗️ Architectural Choices and Technical Justifications
 
-### 1. Storage: Neden PostgreSQL? (Relational vs. NoSQL)
-Projelerde konfigürasyon sadece "Key-Value" çifti değildir; sahiplik, ortam ve aktiflik gibi metadata'lar içerir.
-- **Veri Bütünlüğü (ACID):** `Name + ApplicationName + Environment` üzerinde **Composite Unique Constraint** kullanılarak, tutarsız veri girişi veritabanı seviyesinde engellenmiştir.
-- **Audit Trail (Denetim İzi):** Bonus olan "Rollback" ve "History" özelliklerini sağlamak için ilişkisel bir yapı tercih edilmiştir. `EF Core Interceptor` mimarisi ile her değişiklik otomatik olarak `AuditLog` tablosuna kaydedilir.
-- **Kalıcılık (Persistence):** Redis bir cache çözümüdür; konfigürasyon sistemin "beyni" olduğu için kalıcılık ve ilişkisel sorgulama gücü nedeniyle PostgreSQL seçilmiştir.
+### 1. Storage: Why PostgreSQL? (Relational vs. NoSQL)
+In this project, configuration is not just a "Key-Value" pair; it includes metadata like ownership, environment, and active status.
+- **Data Integrity (ACID):** Using a **Composite Unique Constraint** on `Name + ApplicationName + Environment`, inconsistent data entry is prevented at the database level.
+- **Audit Trail:** A relational structure was chosen to provide "Rollback" and "History" features. With the `EF Core Interceptor` architecture, every change is automatically recorded in the `AuditLog` table.
+- **Persistence:** Redis is a caching solution; since configuration is the "brain" of the system, PostgreSQL was chosen for its persistence and relational querying capabilities.
 
-### 2. Canlı Güncelleme: Neden RabbitMQ? (Event-Driven)
-Değişikliklerin anında yansıması için **RabbitMQ (Direct Exchange)** tercih edilmiştir.
-- **Guaranteed Delivery:** Redis Pub/Sub'ın aksine, RabbitMQ mesajın ulaştığından emin olur (Queue yapısı).
-- **Targeted Routing (RoutingKey):** Her uygulama kendi `ApplicationName` değerini `RoutingKey` olarak kullanır. Bu sayede `SERVICE-A` güncellendiğinde `SERVICE-B` gereksiz network trafiğine ve CPU yüküne maruz kalmaz.
-- **Anlık Senkronizasyon:** Değişiklik yapıldığı an consumer SDK'lar haberdar edilir ve belleklerini (cache) 10ms altında bir sürede günceller.
+### 2. Live Updates: Why RabbitMQ? (Event-Driven)
+**RabbitMQ (Direct Exchange)** was chosen to instantly reflect changes.
+- **Guaranteed Delivery:** Unlike Redis Pub/Sub, RabbitMQ ensures the message is delivered (Queue structure).
+- **Targeted Routing (RoutingKey):** Each application uses its own `ApplicationName` as a `RoutingKey`. Thus, when `SERVICE-A` is updated, `SERVICE-B` is not subjected to unnecessary network traffic or CPU load.
+- **Instant Synchronization:** The moment a change is made, consumer SDKs are notified and they update their memory (cache) in under 10ms.
 
-### 3. Uygulama İzolasyonu (Multi-Layered Security)
-Sistemde "Sıfır Güven" (Zero Trust) prensibi uygulanmıştır:
-- **Identification (Filter):** `ApiKeyAuthorizeAttribute` ile isteği yapanın kimliği API Key üzerinden doğrulanır.
-- **Authorization (MediatR Pipeline):** `TenantAuthorizationBehavior` kullanılarak, bir servisin başka bir servisin verisine erişme denemesi daha iş mantığına (Handler) ulaşmadan **"Zero-Database-Trip"** yöntemiyle engellenir.
-- **Double-Trip Protection:** ID tabanlı isteklerde (Update/Delete) performans kaybını önlemek için yetki kontrolü Handler seviyesinde yapılarak veritabanına mükerrer gitmekten (Double-Trip Anti-pattern) kaçınılmıştır.
+### 3. Application Isolation (Multi-Layered Security)
+The system implements a "Zero Trust" principle:
+- **Identification (Filter):** The identity of the requester is verified via API Key using the `ApiKeyAuthorizeAttribute`.
+- **Authorization (MediatR Pipeline):** Using `TenantAuthorizationBehavior`, an attempt by one service to access another service's data is blocked using a **"Zero-Database-Trip"** method before it even reaches the business logic (Handler).
+- **Double-Trip Protection:** To prevent performance loss in ID-based requests (Update/Delete), authorization is performed at the Handler level, avoiding the Double-Trip Anti-pattern.
 
-### 4. Resilience (Dayanıklılık) — Last Known Good Configuration (LKGC)
-Merkezi sistemlerin "Single Point of Failure" (SPOF) riskine karşı çok katmanlı bir koruma stratejisi uygulanmıştır:
-- **3-Kademeli Retry (Yeniden Deneme):** SDK, API'ye ulaşamadığında hemen pes etmez; üstel bekleme (exponential backoff) ile 3 kez tekrar dener.
-- **Hafıza Önceliği (Memory-over-Disk):** API hatası veya veritabanı kesintisi anında, eğer SDK hafızasında (Memory) hali hazırda çalışan bir veri varsa **asla silinmez/bozulmaz.** "Eski ama çalışan veri, hiç yoktan iyidir" prensibi (Graceful Stay) uygulanır.
-- **Boş Veri Koruması (Empty Response Guard):** API 200 OK dönse bile, veritabanı bağlantısı koptuğu için "boş" bir liste gönderirse; SDK bu veriyi "şüpheli" kabul eder ve mevcut sağlıklı cache'ini korur.
-- **Local Snapshot & Graceful Degradation:** Sadece ilk açılışta API kapalıysa diskteki asenkron yedek (`local-fallback-config.json`) devreye girer. Bu sayede merkez çökse bile istemci "son iyi değerlerle" (Last Known Good) ayağa kalkabilir.
+### 4. Resilience — Last Known Good Configuration (LKGC)
+A multi-layered protection strategy against the "Single Point of Failure" (SPOF) risk of centralized systems is implemented:
+- **3-Tier Retry:** When the SDK cannot reach the API, it doesn't give up immediately; it retries 3 times with exponential backoff.
+- **Memory-over-Disk Priority:** In the event of an API error or database outage, if there is already working data in the SDK's memory, it is **never deleted/corrupted.** The "Graceful Stay" principle (Old but working data is better than none) applies.
+- **Empty Response Guard:** Even if the API returns 200 OK, if it sends an "empty" list because the database connection is lost; the SDK considers this data "suspicious" and preserves its existing healthy cache.
+- **Local Snapshot & Graceful Degradation:** The asynchronous backup on disk (`local-fallback-config.json`) only kicks in if the API is down during the initial startup. Thus, even if the center crashes, the client can boot up with the "Last Known Good" values.
 
 > [!NOTE]
-> **Cache Hiyerarşisi:** SDK, performans için "RAM > Disk" hiyerarşisini kullanır. API kapalıyken RAM'de veri varsa diske gidilmez (Disk I/O maliyetinden kaçınılır). Disk snapshot'ları sadece hafızanın boş olduğu "Cold Start" senaryoları (Örn: Gece 03:00'te merkez API çöktü, consumer app de o an restart yedi vb.) için sigortadır.
+> **Cache Hierarchy:** The SDK uses a "RAM > Disk" hierarchy for performance. If data is in RAM while the API is down, it does not go to disk (avoiding Disk I/O cost). Disk snapshots are just an insurance for "Cold Start" scenarios where memory is empty (e.g., the central API crashes at 03:00 AM, and the consumer app restarts at that exact moment).
 
-### 5. Yapısal Tasarım: Neden Clean Architecture & CQRS?
-Sistemin sürdürülebilirliği, büyüme potansiyeli ve test edilebilirliği için merkezde iş kurallarının olduğu, bağımlılıkların dışarıdan içeriye doğru aktığı Clean Architecture benimsenmiştir.
-- **Bağımlılıkların İzolasyonu (Separation of Concerns):** `Domain` ve `Application` katmanları hiçbir altyapı aracına (EF Core, RabbitMQ, HTTP) bağımlı değildir. Bu sayede yarın PostgreSQL yerine başka bir veritabanına geçilmek istense bile iş mantığında (Business Logic) tek satır kod değişmez.
-- **Odaklanmış İş Mantığı (CQRS):** `MediatR` kullanılarak okuma (Query) ve yazma (Command) işlemleri birbirinden ayrılmıştır. Bu yaklaşım, sınıfların (Handler) yalnızca tek bir amaca hizmet etmesini (Single Responsibility) sağlar ve spagetti kod oluşumunu engeller.
-- **Yüksek Test Edilebilirlik:** İş mantığı veritabanı veya network altyapısına sıkı sıkıya bağlı (tightly-coupled) olmadığı için, dış servisleri `Mock`'layarak Unit Test yazmak son derece hızlı ve güvenilirdir.
+### 5. Structural Design: Why Clean Architecture & CQRS?
+Clean Architecture is adopted to ensure system sustainability, growth potential, and testability, keeping business rules at the center and dependencies flowing inwards.
+- **Separation of Concerns:** `Domain` and `Application` layers are completely agnostic of infrastructure tools (EF Core, RabbitMQ, HTTP). Thus, even if you switch to another database tomorrow, not a single line of code in the business logic changes.
+- **Focused Business Logic (CQRS):** Read (Query) and write (Command) operations are separated using `MediatR`. This approach ensures that classes (Handlers) serve only a single purpose (Single Responsibility) and prevents spaghetti code.
+- **High Testability:** Since the business logic is not tightly-coupled to the database or network infrastructure, writing Unit Tests by `Mock`ing external services is extremely fast and reliable.
 
-### 6. Bellek Yönetimi: Neden ConcurrentDictionary & Volatile? (High-Performance Caching)
-SDK içerisinde konfigürasyonlar bellekte tutulurken "Lock-Free Read" (Kilitsiz Okuma) prensibi uygulanmıştır:
-- **ConcurrentDictionary:** Aynı anda binlerce thread'in sözlükten veri okumasını, yazma (update) operasyonunu engellemeden sağlar.
-- **Volatile & Atomic Swap:** `_cache` referansı `volatile` olarak işaretlenmiştir. Yeni konfigürasyonlar API'den geldiğinde, eski sözlük üzerinde işlem yapmak yerine yeni bir sözlük oluşturulur ve referans **atomik** olarak değiştirilir. Bu sayede okuyucu thread'ler asla "yarım dolmuş" veya "bozuk" bir veri görmez.
-- **SemaphoreSlim:** Konfigürasyon yenileme (`Reload`) işlemi sırasında sistemin gereksiz yere birden fazla API isteği atmasını engellemek için kullanılmıştır. Okumalar kilitsizdir, ancak yazmalar (güncelleme anı) kontrollü bir şekilde serialize edilir.
+### 6. Memory Management: Why ConcurrentDictionary & Volatile? (High-Performance Caching)
+A "Lock-Free Read" principle is implemented while holding configurations in memory within the SDK:
+- **ConcurrentDictionary:** Allows thousands of threads to read data from the dictionary simultaneously without blocking the write (update) operation.
+- **Volatile & Atomic Swap:** The `_cache` reference is marked as `volatile`. When new configurations arrive from the API, instead of modifying the old dictionary, a completely new dictionary is created and the reference is swapped **atomically**. This ensures reader threads never see "partially filled" or "corrupt" data.
+- **SemaphoreSlim:** Used to prevent the system from sending unnecessary multiple API requests during a configuration refresh (`Reload`). Reads are lock-free, but writes (the moment of update) are serially controlled.
 
-
----
-
-## 🔩 Dependency Injection — Servis Scope Kararları
-
-### API Tarafı (`Program.cs`)
-
-| Servis | Scope | Neden |
-|---|---|---|
-| `ConfigDbContext` | **Scoped** | EF Core DbContext per-request yaşam döngüsü gerektirir |
-| `IConfigurationRepository` | **Scoped** | DbContext'e bağımlı, aynı scope'ta olmalı |
-| `IAuditLogRepository` | **Scoped** | DbContext'e bağımlı |
-| `IMessagePublisher` (RabbitMQ) | **Singleton** | Persistent connection/channel reuse, `SemaphoreSlim` ile thread-safe |
-| `IAuditContextAccessor` | **Singleton** | `AsyncLocal<T>` ile request bazında veri taşır, state'siz |
-| `AuditInterceptor` | **Singleton** | EF Core interceptor'lar singleton olarak çalışır |
-| `ApiKeyAuthorizeAttribute` | **Scoped** | `ServiceFilter` olarak her request'te yeni instance |
-
-### SDK (Client) Tarafı (`ServiceCollectionExtensions.cs`)
-
-| Servis | Scope | Neden |
-|---|---|---|
-| `IConfigSdkService` | **Singleton** | `ConcurrentDictionary` cache tüm yaşam döngüsünce korunmalı |
-| `HttpClient` | **IHttpClientFactory** | DNS havuz yönetimi, `SetHandlerLifetime(5dk)` ile socket exhaustion önlenir |
-| `RabbitMqSubscriberHostedService` | **Singleton** | `BackgroundService` zaten Singleton'dır |
-
-> **⚠️ Captive Dependency Uyarısı:** `IConfigSdkService` Singleton olmalıdır çünkü `BackgroundService` (Singleton) onu inject eder. Transient/Scoped olursa Captive Dependency anti-pattern'i oluşur.
 
 ---
 
-## 🛠️ Kurulum & Çalıştırma
+## 🔩 Dependency Injection — Service Scope Decisions
 
-### Gereksinimler
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (v20+ önerilir)
+### API Side (`Program.cs`)
+
+| Service | Scope | Reason |
+|---|---|---|
+| `ConfigDbContext` | **Scoped** | EF Core DbContext requires a per-request lifecycle |
+| `IConfigurationRepository` | **Scoped** | Dependent on DbContext, must be in the same scope |
+| `IAuditLogRepository` | **Scoped** | Dependent on DbContext |
+| `IMessagePublisher` (RabbitMQ) | **Singleton** | Persistent connection/channel reuse, thread-safe with `SemaphoreSlim` |
+| `IAuditContextAccessor` | **Singleton** | Carries data on a per-request basis with `AsyncLocal<T>`, stateless |
+| `AuditInterceptor` | **Singleton** | EF Core interceptors run as singletons |
+| `ApiKeyAuthorizeAttribute` | **Scoped** | New instance per request as a `ServiceFilter` |
+
+### SDK (Client) Side (`ServiceCollectionExtensions.cs`)
+
+| Service | Scope | Reason |
+|---|---|---|
+| `IConfigSdkService` | **Singleton** | `ConcurrentDictionary` cache must be preserved throughout the lifecycle |
+| `HttpClient` | **IHttpClientFactory** | DNS pool management, prevents socket exhaustion with `SetHandlerLifetime(5min)` |
+| `RabbitMqSubscriberHostedService` | **Singleton** | `BackgroundService` is already a Singleton |
+
+> **⚠️ Captive Dependency Warning:** `IConfigSdkService` must be a Singleton because the `BackgroundService` (Singleton) injects it. Making it Transient/Scoped causes a Captive Dependency anti-pattern.
+
+---
+
+## 🛠️ Setup & Execution
+
+### Requirements
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (v20+ recommended)
 - Git
 
-### Tek Komutla Çalıştırma
+### Run with a Single Command
 
 ```bash
-# 1. Projeyi klonlayın
+# 1. Clone the project
 git clone https://github.com/FurkanHaydari/DistributedConfigHub.Net
 cd DistributedConfigHub.Net
 
-# 2. Tüm sistemi ayağa kaldırın
+# 2. Spin up the entire system
 docker compose up --build -d
 
-# 3. Container durumlarını kontrol edin
+# 3. Check container statuses
 docker compose ps
 ```
 
-> ⏳ İlk `--build` yaklaşık 30-60 saniye sürer. PostgreSQL ve RabbitMQ healthcheck'leri geçtikten sonra API başlar.
+> ⏳ The initial `--build` takes about 30-60 seconds. The API starts after PostgreSQL and RabbitMQ health checks pass.
 
-### Temiz Başlangıç (Volume Sıfırlama)
+### Clean Start (Volume Reset)
 
-Veritabanını sıfırdan oluşturmak için:
+To recreate the database from scratch:
 
 ```bash
-docker compose down -v        # Volume'ları sil
-docker compose up --build -d  # Tekrar oluştur
+docker compose down -v        # Delete volumes
+docker compose up --build -d  # Recreate
 ```
 
 ---
 
-## 🌐 Port & Erişim Bilgileri
+## 🌐 Ports & Access Information
 
-Sistem ayağa kalktığında aşağıdaki adresler aktif olur:
+When the system is up, the following addresses become active:
 
-| Servis | URL | Açıklama |
+| Service | URL | Description |
 |---|---|---|
-| 🖥️ **Admin Panel** | http://localhost:5173 | Yönetim arayüzü (config CRUD, health, audit) |
-| 📡 **Scalar UI (API)** | http://localhost:5173/scalar/v1 | Admin API modern endpoint dokümantasyonu |
-| ❤️ **Health Check** | http://localhost:5173/Health | PostgreSQL + RabbitMQ durum bilgisi |
-| 🖥️ **Demo Consumer App** | http://localhost:5174 | Consumer App Servisi|
-| 📡 **Swagger UI** | http://localhost:5174/swagger | Demo Consumer App API endpoint dokümantasyonu |
-| 🐇 **RabbitMQ Panel** | http://localhost:15672 | Kuyruk yönetimi (`guest` / `guest`) |
-| 🐘 **PostgreSQL** | localhost:5432 | Veritabanı (`postgres` / `postgres`) |
+| 🖥️ **Admin Panel** | http://localhost:5173 | Management interface (config CRUD, health, audit) |
+| 📡 **Scalar UI (API)** | http://localhost:5173/scalar/v1 | Admin API modern endpoint documentation |
+| ❤️ **Health Check** | http://localhost:5173/Health | PostgreSQL + RabbitMQ status check |
+| 🖥️ **Demo Consumer App** | http://localhost:5174 | Consumer App Service|
+| 📡 **Swagger UI** | http://localhost:5174/swagger | Demo Consumer App API endpoint documentation |
+| 🐇 **RabbitMQ Panel** | http://localhost:15672 | Queue management (`guest` / `guest`) |
+| 🐘 **PostgreSQL** | localhost:5432 | Database (`postgres` / `postgres`) |
 
-### 🔑 API Key Bilgileri
+### 🔑 API Key Information
 
-| Application | API Key | Kullanım |
+| Application | API Key | Usage |
 |---|---|---|
 | `SERVICE-A` | `service-a-secret-key` | Service A Key |
 | `SERVICE-B` | `service-b-secret-key` | Service B Key |
 
 ---
 
-## 📡 API Endpoint'leri
+## 📡 API Endpoints
 
-| Method | Endpoint | Açıklama |
+| Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/configurations?applicationName=SERVICE-A` | Konfigürasyon listeleme |
-| `GET` | `/configurations/{id}` | Tek konfigürasyon getirme |
-| `POST` | `/configurations` | Yeni konfigürasyon oluşturma |
-| `GET` | `/configurations/deleted?applicationName=SERVICE-A` | Silinmiş (IsActive = false) konfigürasyonları listeleme |
-| `PUT` | `/configurations/{id}` | Değer güncelleme (+ RabbitMQ sinyal) |
-| `DELETE` | `/configurations/{id}` | Konfigürasyonu pasife alma |
-| `GET` | `/configurations/{id}/history` | Audit geçmişini görüntüleme |
-| `POST` | `/configurations/{id}/rollback/{auditLogId}` | Belirli noktaya geri alma |
-| `GET` | `/Health` | PostgreSQL + RabbitMQ durum kontrolü |
+| `GET` | `/configurations?applicationName=SERVICE-A` | List configurations |
+| `GET` | `/configurations/{id}` | Get single configuration |
+| `POST` | `/configurations` | Create new configuration |
+| `GET` | `/configurations/deleted?applicationName=SERVICE-A` | List deleted (IsActive = false) configurations |
+| `PUT` | `/configurations/{id}` | Update value (+ RabbitMQ signal) |
+| `DELETE` | `/configurations/{id}` | Deactivate configuration |
+| `GET` | `/configurations/{id}/history` | View audit history |
+| `POST` | `/configurations/{id}/rollback/{auditLogId}` | Rollback to a specific point |
+| `GET` | `/Health` | PostgreSQL + RabbitMQ status check |
 
 
-### 📬 Postman Collection ile Hızlı Test
+### 📬 Quick Testing with Postman Collection
 
-Projeyi ayağa kaldırdıktan sonra API'yi hızlıca keşfetmek ve test etmek için repository içerisinde hazır bir Postman yapılandırması bulunmaktadır.
+To quickly explore and test the API after spinning up the project, there is a ready-to-use Postman configuration in the repository.
 
-**Nasıl Kullanılır?**
-1. Postman uygulamasını açın ve sol üstteki **Import** butonuna tıklayın.
-2. Proje dizinindeki `docs` klasörü altında yer alan `ConfigHub.postman_collection.json` dosyasını seçip içe aktarın.
-3. İçe aktarılan klasördeki tüm isteklerde environment değişkenleri (Örn: `X-Api-Key`, `url`, `configId`, `auditLogId`) ve bazı scriptler hazır olarak gelir.
-4. Herhangi bir ayar yapmadan doğrudan **Send** butonuna basarak API'yi test etmeye başlayabilirsiniz!
+**How to Use?**
+1. Open the Postman application and click the **Import** button at the top left.
+2. Select and import the `ConfigHub.postman_collection.json` file located under the `docs` folder in the project directory.
+3. All requests in the imported folder come ready with environment variables (e.g., `X-Api-Key`, `url`, `configId`, `auditLogId`) and some scripts.
+4. You can start testing the API directly by clicking the **Send** button without making any settings!
 
-### Örnek İstekler
+### Example Requests
 
-**Konfigürasyon Listeleme:**
+**List Configurations:**
 ```http
 GET /configurations?applicationName=SERVICE-A
 X-Api-Key: service-a-secret-key
 ```
-**Response:**
-```json
-[
-    {
-        "id": "00000000-0000-0000-0000-000000000103",
-        "name": "MainDatabase",
-        "type": "String",
-        "value": "Host=postgres;Database=db_beta;Username=postgres;Password=postgres",
-        "applicationName": "SERVICE-A",
-        "environment": "dev",
-        "isActive": true
-    },
-    {
-        "id": "00000000-0000-0000-0000-000000000103",
-        "name": "MainDatabase",
-        "type": "String",
-        "value": "Host=postgres;Database=db_beta;Username=postgres;Password=postgres",
-        "applicationName": "SERVICE-A",
-        "environment": "staging",
-        "isActive": true
-    },
-    {
-        "id": "00000000-0000-0000-0000-000000000103",
-        "name": "MainDatabase",
-        "type": "String",
-        "value": "Host=postgres;Database=db_alpha;Username=postgres;Password=postgres",
-        "applicationName": "SERVICE-A",
-        "environment": "prod",
-        "isActive": true
-    }
-]
-```
 
-**Yeni Konfigürasyon Ekleme:**
+**Add New Configuration:**
 ```http
 POST /configurations
 Content-Type: application/json
@@ -342,13 +310,9 @@ X-Api-Key: service-a-secret-key
   "environment": "prod"
 }
 ```
-**Response:**
-```json
-"74cc9281-f916-4d37-8265-c653d1d626b2"
-```
 
 
-**Değer Güncelleme (Canlı Sinyal):**
+**Update Value (Live Signal):**
 ```http
 PUT /configurations/00000000-0000-0000-0000-000000000001
 Content-Type: application/json
@@ -359,71 +323,69 @@ X-Api-Key: service-a-secret-key
   "value": "true"
 }
 ```
-**Response:**
-204 No Content
 
 ---
 
-## 🧪 Testler
+## 🧪 Tests
 
 ```bash
-# Tüm testleri çalıştır
+# Run all tests
 dotnet test
 
-# Sonuç: 17/17 Test Passed ✅
+# Result: 17/17 Test Passed ✅
 ```
 
-| Test Kategorisi / Sınıfı | Kapsam |
+| Test Category / Class | Scope |
 |---|---|
-| **🧪 Birim Testleri (Unit Tests)** | |
-| `ConfigSdkServiceTests` | SDK tarafındaki her türlü ağ kesintisi senaryosu, yerel dosya (fallback) mekanizması ve relative URL çözünürlüğü. |
-| `UpdateConfigurationCommandHandlerTests` | MediatR komut işleme, eksik kayıtlarda fırlatılan `KeyNotFoundException` ve asenkron RabbitMQ event tetikleme. |
-| `ApiKeyAuthorizeAttributeTests` | `X-Api-Key` doğrulama mantığı, eksik/yanlış anahtarda `401 Unauthorized` yanıtları ve güvenlik filtreleri. |
-| **🔗 Entegrasyon Testleri (Integration Tests)** | |
-| `LiveUpdateIntegrationTest` | Gerçek bir RabbitMQ ve PostgreSQL (Testcontainers) üzerinde canlı sinyalizasyon ve veri tutarlılık testi. |
-| `RollbackIntegrationTest` | Audit logları üzerinden konfigürasyonu milisaniyelik doğrulukla eski bir noktaya geri döndürme akışı. |
-| `SecurityAndResilienceIntegrationTest`| Altyapı katmanındaki dayanıklılık senaryoları ve API güvenliğinin uçtan uca doğrulanması. |
+| **🧪 Unit Tests** | |
+| `ConfigSdkServiceTests` | All kinds of network outage scenarios on the SDK side, local file (fallback) mechanism, and relative URL resolution. |
+| `UpdateConfigurationCommandHandlerTests` | MediatR command processing, `KeyNotFoundException` thrown for missing records, and asynchronous RabbitMQ event triggering. |
+| `ApiKeyAuthorizeAttributeTests` | `X-Api-Key` validation logic, `401 Unauthorized` responses for missing/incorrect keys, and security filters. |
+| **🔗 Integration Tests** | |
+| `LiveUpdateIntegrationTest` | Live signaling and data consistency test on a real RabbitMQ and PostgreSQL (Testcontainers). |
+| `RollbackIntegrationTest` | Rollback flow to restore a configuration to an old point with millisecond accuracy via audit logs. |
+| `SecurityAndResilienceIntegrationTest`| End-to-end verification of resilience scenarios at the infrastructure layer and API security. |
 
 
 ---
 
-## 🎯 Demo Senaryosu
+## 🎯 Demo Scenario
 
-Aşağıdaki adımları sırasıyla takip ederek sistemi **canlı** olarak deneyebilirsiniz.
+You can experience the system **live** by following the steps below in order.
 
-### Ön Hazırlık — Pencere Düzeni
+### Preparation — Window Layout
 
-Canlı teste başlamadan önce aşağıdaki pencereleri hazırlayın:
+Before starting the live test, prepare the following windows:
 
-| Pencere | İçerik | Not |
+| Window | Content | Note |
 |---|---|---|
-| 🖥️ Terminal 1 | Docker komutları | Ana terminal |
-| 🖥️ Terminal 2 | `docker compose logs -f demo_consumer` | Consumer logları (canlı) |
-| 🖥️ Terminal 3 | `docker compose logs -f config_api` | Config Hub logları (canlı) |
-| 🌐 Tarayıcı Tab 1 | `http://localhost:5173` | Admin Panel |
-| 🌐 Tarayıcı Tab 2 | `http://localhost:5174` | Consumer Ürün Sayfası |
-| 🌐 Tarayıcı Tab 3 | `http://localhost:15672` | RabbitMQ (opsiyonel) |
+| 🖥️ Terminal 1 | Docker commands | Main terminal |
+| 🖥️ Terminal 2 | `docker compose logs -f demo_consumer` | Consumer logs (live) |
+| 🖥️ Terminal 3 | `docker compose logs -f config_api` | Config Hub logs (live) |
+| 🌐 Browser Tab 1 | `http://localhost:5173` | Admin Panel |
+| 🌐 Browser Tab 2 | `http://localhost:5174` | Consumer Product Page |
+| 🌐 Browser Tab 3 | `http://localhost:15672` | RabbitMQ (optional) |
 
 ---
 
-### Aşama 1 — Sistemi Ayağa Kaldırma
+### Phase 1 — Spinning Up the System
 
-**Terminal 1**'de:
+In **Terminal 1**:
 ```bash
 docker compose up --build -d
-docker compose ps   # 4 containerın tümü "Up" olmalı
+docker compose ps   # All 4 containers should be "Up"
 ```
 
-**Terminal 2** ve **Terminal 3**'ü açın (yan yana):
+Open **Terminal 2** and **Terminal 3** (side by side):
 ```bash
-# Terminal 2 — Consumer loglarını canlı izle
+# Terminal 2 — Watch consumer logs live
 docker compose logs -f demo_consumer
 
-# Terminal 3 — Config Hub API loglarını canlı izle
+# Terminal 3 — Watch Config Hub API logs live
 docker compose logs -f config_api
 ```
 
-> 💡 Terminal 2'de başlangıçta şu loglar görünecek:
+> 💡 Initially, the following logs will appear in Terminal 2:
 > ```
 > Database 'db_alpha' created on PostgreSQL server.
 > Database 'db_alpha' initialized with seed data.
@@ -431,207 +393,170 @@ docker compose logs -f config_api
 > Database 'db_beta' initialized with seed data.
 > RabbitMQ Background Subscriber initialized and listening to routing key: SERVICE-A
 > ```
-> Her iki veritabanı da `DatabaseInitializer` tarafından yaratılır.
+> Both databases are created by the `DatabaseInitializer`.
 
 ---
 
-### Aşama 2 — Admin Panel Genel Bakış
+### Phase 2 — Admin Panel Overview
 
 ![Admin Panel](./docs/assets/admin-panel.png)
 
-🌐 **Tarayıcı Tab 1** → `http://localhost:5173`
+🌐 **Browser Tab 1** → `http://localhost:5173`
 
-1. **Health kartları** sağlık durumunu gösterir → PostgreSQL ✅, RabbitMQ ✅
-2. **Kayıtlı Servisler** kartı kayıtlı servisleri gösterir → SERVICE-A (dev, staging, prod)
-3. Filtre ile ortamlar arası geçiş yapabilirsiniz → dev / staging / prod
-4. Konfigürasyon listesinde `MainDatabase`, `IsMaintenanceModeEnabled`, `ExternalPaymentApiUrl` gibi kayıtları inceleyebilirsiniz.
+1. **Health cards** show the health status → PostgreSQL ✅, RabbitMQ ✅
+2. **Registered Services** card shows registered services → SERVICE-A (dev, staging, prod)
+3. You can switch between environments using the filter → dev / staging / prod
+4. You can examine records like `MainDatabase`, `IsMaintenanceModeEnabled`, `ExternalPaymentApiUrl` in the configuration list.
 
 ---
 
-### Aşama 3 — Consumer Ürün Sayfası
+### Phase 3 — Consumer Product Page
 
 ![Consumer Product Page](./docs/assets/consumer-product-page.png)
 
-🌐 **Tarayıcı Tab 2** → `http://localhost:5174`
+🌐 **Browser Tab 2** → `http://localhost:5174`
 
-1. Sayfa otomatik olarak ürünleri yükleyecek (5 adet Alpha ürünü)
-2. **Sağ alt köşedeki "Sistem Bilgisi" paneli** görülebilir:
-   - **Uptime** → Uygulama ne kadar süredir ayakta (bu değer artmaya devam edecek!)
-   - **Environment** → PROD (`ASPNETCORE_ENVIRONMENT`'tan otomatik)
-   - **Aktif DB** → db_alpha
-   - **Bakım Modu** → Kapalı
-3. Header'da **ENV: PROD** ve **Aktif DB: db_alpha** badge'leri görünür
+1. The page will automatically load products (5 Alpha products)
+2. **"SYSTEM INFO" panel in the bottom right corner** can be seen:
+   - **Uptime** → How long the application has been up (this value will keep increasing!)
+   - **Environment** → PROD (automatically from `ASPNETCORE_ENVIRONMENT`)
+   - **Active DB** → db_alpha
+   - **Maintenance Mode** → Disabled
+3. **ENV: PROD** and **Active DB: db_alpha** badges appear in the header
 
-> 💡 Sayfa her 3 saniyede bir otomatik güncellenir — manuel yenileme gerekmez.
+> 💡 The page auto-refreshes every 3 seconds — no manual refresh required.
 
 ---
 
-### Aşama 4 — Bakım Modu Demosu (Canlı Config Değişikliği)
+### Phase 4 — Maintenance Mode Demo (Live Config Change)
 
 ![Maintenance Mode](./docs/assets/maintenance-mode.gif)
 
-🌐 **Tarayıcı Tab 1** → Admin Panel
+🌐 **Browser Tab 1** → Admin Panel
 
-1. `IsMaintenanceModeEnabled` (dev) değerini `false` → `true` olarak güncelleyin ve kaydedin
+1. Update the `IsMaintenanceModeEnabled` (dev) value from `false` → `true` and save
 
-🌐 **Tarayıcı Tab 2** → Consumer Sayfası (Her 3 saniyede bir otomatik güncellenir)
+🌐 **Browser Tab 2** → Consumer Page (Auto-refreshes every 3 seconds)
 
-2. **Anında** bakım modu overlay'i görünecek:
-   - 🔧 Bakım modu özel penceresi
-   - **Ortam: DEV · DB: db_alpha** bilgisi
+2. The maintenance mode overlay will appear **instantly**:
+   - 🔧 Special maintenance mode window
+   - **Environment: DEV · DB: db_alpha** info
 
-3. **Sistem Bilgisi paneli** bakım modunda da görünmeye devam eder:
-   - Bakım Modu → **AKTİF** (sarı)
-   - Uptime → Hâlâ artıyor (uygulama restart olmuyor)
+3. **SYSTEM INFO panel** continues to appear in maintenance mode:
+   - Maintenance Mode → **ACTIVE** (yellow)
+   - Uptime → Still increasing (application does not restart)
 
-🖥️ **Terminal 2** → Consumer loglarında:
-```bash
-confighub-demo  | info: DistributedConfigHub.Client.RabbitMqSubscriberHostedService[0]
-confighub-demo  |       Received config update for current environment 'prod': SERVICE-A|prod. Reloading configs...
-confighub-demo  | info: System.Net.Http.HttpClient.ConfigHub.LogicalHandler[100]
-confighub-demo  |       Start processing HTTP request GET http://config_api:8080/Configurations?*
-confighub-demo  | info: System.Net.Http.HttpClient.ConfigHub.ClientHandler[100]
-confighub-demo  |       Sending HTTP request GET http://config_api:8080/Configurations?*
-confighub-demo  | info: System.Net.Http.HttpClient.ConfigHub.ClientHandler[101]
-confighub-demo  |       Received HTTP response headers after 6.523ms - 200
-confighub-demo  | info: System.Net.Http.HttpClient.ConfigHub.LogicalHandler[101]
-confighub-demo  |       End processing HTTP request after 6.7487ms - 200
-confighub-demo  | info: DistributedConfigHub.Client.ConfigSdkService[0]
-confighub-demo  |       Configurations successfully loaded from API and cached to local-fallback-config.json.
-confighub-demo  | info: Program[0]
-confighub-demo  |         ↳ MainDatabase = Host=postgres;Database=db_alpha;Username=postgres;Password=postgres
-confighub-demo  | info: Program[0]
-confighub-demo  |         ↳ IsMaintenanceModeEnabled = true
-confighub-demo  | info: Program[0]
-confighub-demo  |         ↳ MaxConcurrentTransactions = 50000
-confighub-demo  | info: Program[0]
-confighub-demo  |         ↳ ExternalPaymentApiUrl = https://pay.enterprise.com
-```
-
-4. Admin Panel'e dönüp `IsMaintenanceModeEnabled` → `false` yapın
-5. Consumer sayfası **anında** ürün kataloğuna geri döner ✨
+4. Return to Admin Panel and set `IsMaintenanceModeEnabled` → `false`
+5. The consumer page **instantly** returns to the product catalog ✨
 
 ---
 
-### Aşama 5 — Database Hot-Swap (Sihir Anı ✨)
+### Phase 5 — Database Hot-Swap (Magic Moment ✨)
 
 ![Database Hot-Swap](./docs/assets/live-db-change.gif)
 
-🌐 **Tarayıcı Tab 2** → Consumer sayfasında ürünleri ve sağ alttaki panele bakın:
-- 5 adet **Alpha** ürünü (Alpha Laptop Pro, Alpha Phone X, ...)
-- Aktif DB: **db_alpha**
-- Uptime değerine dikkat edin
+🌐 **Browser Tab 2** → Look at the products on the Consumer page and the panel on the bottom right:
+- 5 **Alpha** products (Alpha Laptop Pro, Alpha Phone X, ...)
+- Active DB: **db_alpha**
+- Pay attention to the Uptime value
 
-🌐 **Tarayıcı Tab 1** → Admin Panel'e dönün:
+🌐 **Browser Tab 1** → Return to Admin Panel:
 
-1. `MainDatabase` (dev) konfigürasyonunu bulun
-2. Değerini değiştirin:
+1. Find the `MainDatabase` (dev) configuration
+2. Change its value:
    ```
-   Eski: Host=postgres;Database=db_alpha;Username=postgres;Password=postgres
-   Yeni: Host=postgres;Database=db_beta;Username=postgres;Password=postgres
+   Old: Host=postgres;Database=db_alpha;Username=postgres;Password=postgres
+   New: Host=postgres;Database=db_beta;Username=postgres;Password=postgres
    ```
-3. Kaydedin
+3. Save
 
-🌐 **Tarayıcı Tab 2** → Consumer sayfasına dönün:
+🌐 **Browser Tab 2** → Return to Consumer page:
 
-4. Artık **4 adet Beta ürünü** görünüyor! (Beta Smartwatch Ultra, Beta Tablet Air, ...)
-5. Sağ alt panelde:
-   - Aktif DB → **db_beta** 🟣
-   - Uptime → **Hâlâ artıyor!** Uygulama kapanmadı 🟢
-   - Bakım Modu → Kapalı
-
-🖥️ **Terminal 2** loglarında:
-```bash
-confighub-demo  | info: DistributedConfigHub.Client.ConfigSdkService[0]
-confighub-demo  |       Configurations successfully loaded from API and cached to local-fallback-config.json.
-confighub-demo  | info: Program[0]
-confighub-demo  |         ↳ MainDatabase = Host=postgres;Database=db_beta;Username=postgres;Password=postgres
-```
-
-🖥️ **Terminal 3** loglarında:
-```bash
-confighub-api  |       Published config update to exchange 'config_updates_direct' for application 'SERVICE-A' on environment 'prod'
-```
+4. Now **4 Beta products** are visible! (Beta Smartwatch Ultra, Beta Tablet Air, ...)
+5. In the bottom right panel:
+   - Active DB → **db_beta** 🟣
+   - Uptime → **Still increasing!** Application did not close 🟢
+   - Maintenance Mode → Disabled
 
 ---
 
-### Aşama 6 — Audit & Rollback
+### Phase 6 — Audit & Rollback
 
 ![Audit & Rollback](./docs/assets/rollback.gif)
 
-🌐 **Tarayıcı Tab 1** → Admin Panel
+🌐 **Browser Tab 1** → Admin Panel
 
-1. `MainDatabase` konfigürasyonunun **📜 (history)** butonuna tıklayın
-2. Değişiklik geçmişi görülecek (INSERT → UPDATE → ...)
-3. İlk değere (db_alpha) **"Bu noktaya geri al"** butonuyla rollback yapın
-4. Consumer sayfasında tekrar **Alpha ürünleri** görünecek
-5. Uptime **hâlâ** devam ediyor 🟢
-
----
-
-### Aşama 7 — RabbitMQ Görselleştirme (Opsiyonel)
-
-🌐 **Tarayıcı Tab 3** → `http://localhost:15672` → Giriş: `guest` / `guest`
-
-1. **Exchange Yapısını İnceleme:**
-   - **Exchanges** sekmesine gidin ve `config_updates_direct` exchange'ine tıklayın.
-   - **Bindings** kısmında, o an bağlı olan `demo_consumer` kuyruğunu ve `SERVICE-A` routing key'i göreceksiniz.
-
-2. **Yeni Kuyruk ile "Sniffing" (Güvenlik Testi):**
-   - Gerçek consumer'lar `Exclusive` (bağlantı kopunca silinen) kuyruklar kullandığı için onları dışarıdan izlemek zordur. Bu yüzden **Queues and Streams** sekmesine gidin.
-   - **Add a new queue** bölümünden `debug-sniffer` isimli kalıcı bir kuyruk oluşturun.
-   - Bu yeni kuyruğun içine girin ve **Bindings** kısmından onu `config_updates_direct` exchange'ine, `SERVICE-A` routing key'i ile bind edin.
-
-3. **Mesajı Canlı Yakalama:**
-   - Admin Panel'den bir ayarı güncelleyin.
-   - RabbitMQ'da `debug-sniffer` kuyruğuna mesajın düştüğünü (`Ready: 1`) göreceksiniz.
-   - Kuyruk detayında **Get Messages** butonuna basın. 
-   - ✨ Sinyalin payloadı (Örn: `{"SERVICE-A|prod"}`) ham veri olarak görünecek.
+1. Click the **📜 (history)** button of the `MainDatabase` configuration
+2. Change history will be visible (INSERT → UPDATE → ...)
+3. Rollback to the first value (db_alpha) with the **"Rollback to this point"** button
+4. **Alpha products** will appear again on the Consumer page
+5. Uptime **still** continues 🟢
 
 ---
 
-### Aşama 8 — Güvenlik Demosu (Opsiyonel)
+### Phase 7 — RabbitMQ Visualization (Optional)
 
-Yanlış API anahtarı ile istek gönderin:
+🌐 **Browser Tab 3** → `http://localhost:15672` → Login: `guest` / `guest`
+
+1. **Examining Exchange Structure:**
+   - Go to the **Exchanges** tab and click on the `config_updates_direct` exchange.
+   - In the **Bindings** section, you will see the currently connected `demo_consumer` queue and `SERVICE-A` routing key.
+
+2. **"Sniffing" with a New Queue (Security Test):**
+   - Since real consumers use `Exclusive` queues (which are deleted when the connection drops), they are hard to monitor externally. Go to the **Queues and Streams** tab for this.
+   - Create a persistent queue named `debug-sniffer` from the **Add a new queue** section.
+   - Enter this new queue and bind it to the `config_updates_direct` exchange with the `SERVICE-A` routing key from the **Bindings** section.
+
+3. **Capturing Message Live:**
+   - Update a setting from the Admin Panel.
+   - You will see the message drop into the `debug-sniffer` queue in RabbitMQ (`Ready: 1`).
+   - Click the **Get Messages** button in the queue details. 
+   - ✨ The payload of the signal (e.g. `{"SERVICE-A|prod"}`) will appear as raw data.
+
+---
+
+### Phase 8 — Security Demo (Optional)
+
+Send a request with an incorrect API key:
 ```bash
-curl -H "X-Api-Key: yanlis-anahtar" "http://localhost:5173/configurations?applicationName=SERVICE-A"
+curl -H "X-Api-Key: wrong-key" "http://localhost:5173/configurations?applicationName=SERVICE-A"
 # → 401 Unauthorized
 ```
 
-Doğru API anahtarı ile:
+With the correct API key:
 ```bash
 curl -H "X-Api-Key: service-a-secret-key" "http://localhost:5173/configurations?applicationName=SERVICE-A"
-# → 200 OK + JSON verileri
+# → 200 OK + JSON data
 ```
 
 ---
 
-### 📋 Hızlı Referans — Docker Log Komutları
+### 📋 Quick Reference — Docker Log Commands
 
 <details>
-<summary><b>Log Komutlarını Görmek İçin Tıklayın</b></summary>
+<summary><b>Click to See Log Commands</b></summary>
 <br>
 
 ```bash
-# Tüm container logları (canlı)
+# All container logs (live)
 docker compose logs -f
 
-# Sadece Consumer logları
+# Only Consumer logs
 docker compose logs -f demo_consumer
 
-# Sadece Config Hub API logları
+# Only Config Hub API logs
 docker compose logs -f config_api
 
-# Sadece PostgreSQL logları
+# Only PostgreSQL logs
 docker compose logs -f postgres
 
-# Sadece RabbitMQ logları
+# Only RabbitMQ logs
 docker compose logs -f rabbitmq
 
-# Son 50 satır + canlı takip
+# Last 50 lines + live tracking
 docker compose logs -f --tail=50 demo_consumer
 
-# Container durumları
+# Container statuses
 docker compose ps
 ```
 </details>
@@ -639,7 +564,7 @@ docker compose ps
 ---
 
 <p align="center">
-  💻 <b>Furkan Haydari</b> tarafından geliştirildi. <br><br>
+  💻 Developed by <b>Furkan Haydari</b>. <br><br>
   <a href="https://github.com/FurkanHaydari"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
   <a href="https://www.linkedin.com/in/furkanhaydari"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
   <a href="mailto:nomorerotting@gmail.com"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"></a>
