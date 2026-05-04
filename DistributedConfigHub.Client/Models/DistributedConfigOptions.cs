@@ -16,8 +16,8 @@ public class DistributedConfigOptions
     public string RabbitMqExchangeName { get; set; } = "config_updates_direct";
 
     /// <summary>
-    /// Konfigürasyon güncellendiğinde çağrılacak opsiyonel callback.
-    /// SDK kullanıcısı, güncelleme sonrası kendi loglamasını veya aksiyonunu bu callback ile enjekte edebilir.
+    /// Optional callback to invoke when configuration is updated.
+    /// The SDK user can inject their own logging or action after the update using this callback.
     /// </summary>
     public Func<IConfigSdkService, Task>? OnConfigurationUpdated { get; set; }
 }

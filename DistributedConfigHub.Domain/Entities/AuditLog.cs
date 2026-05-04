@@ -16,7 +16,7 @@ public class AuditLog
     public string? UserName { get; set; }
     public string? UserIp { get; set; }
     
-    public string? Reason { get; set; } // İşlemin özel nedeni varsa (örneğin: ROLLBACK to xxx)
+    public string? Reason { get; set; } // If there is a specific reason for the operation (e.g., ROLLBACK to xxx)
     
     public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 }

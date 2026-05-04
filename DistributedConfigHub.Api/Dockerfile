@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Sadece projeleri kopyalayıp (restore) yapıyoruz ki layerlar cache'lensin
+# We only copy projects (restore) first to cache layers
 COPY ["DistributedConfigHub.Api/DistributedConfigHub.Api.csproj", "DistributedConfigHub.Api/"]
 COPY ["DistributedConfigHub.Application/DistributedConfigHub.Application.csproj", "DistributedConfigHub.Application/"]
 COPY ["DistributedConfigHub.Domain/DistributedConfigHub.Domain.csproj", "DistributedConfigHub.Domain/"]
@@ -10,7 +10,7 @@ COPY ["DistributedConfigHub.Client/DistributedConfigHub.Client.csproj", "Distrib
 
 RUN dotnet restore "DistributedConfigHub.Api/DistributedConfigHub.Api.csproj"
 
-# Kalanı kopyalayıp build alıyoruz
+# Copy the rest and build
 COPY . .
 WORKDIR "/src/DistributedConfigHub.Api"
 RUN dotnet build "DistributedConfigHub.Api.csproj" -c Release -o /app/build

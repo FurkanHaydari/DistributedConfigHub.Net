@@ -59,7 +59,7 @@ services:
     ports:
       - "5174:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production # Development, Staging ve Production için ayarlanabilir.
+      - ASPNETCORE_ENVIRONMENT=Production # Can be configured for Development, Staging and Production.
       - DistributedConfig__ApiBaseUrl=http://config_api:8080
       - DistributedConfig__RabbitMqHostName=rabbitmq
     depends_on:

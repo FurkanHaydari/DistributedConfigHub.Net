@@ -694,7 +694,7 @@
         <div id="errorCard" class="error-card">
             <div class="error-card-header">
                 <div class="error-card-title">
-                    <span>⚠️</span> API Doğrulama Hatası
+                    <span>⚠️</span> API Validation Error
                 </div>
                 <button class="error-card-close" onclick="hideError()">✕</button>
             </div>
@@ -873,7 +873,7 @@
             if (typeof errorData === 'string') {
                 list.innerHTML = `<li>${errorData}</li>`;
             } else {
-                // 1. Ana Hata Mesajı (ProblemDetails Title & Detail)
+                // 1. Main Error Message (ProblemDetails Title & Detail)
                 if (errorData.title || errorData.detail) {
                     const title = errorData.title ? `<strong>${errorData.title}</strong>: ` : '';
                     const detail = errorData.detail || '';
@@ -882,11 +882,11 @@
                     }
                 }
 
-                // 2. Detaylı Validasyon Hataları (FluentValidation / errors dictionary)
+                // 2. Detailed Validation Errors (FluentValidation / errors dictionary)
                 if (errorData.errors) {
                     Object.keys(errorData.errors).forEach(key => {
                         const messages = errorData.errors[key];
-                        // JSON path ($.value) temizliği
+                        // JSON path ($.value) cleanup
                         const cleanKey = key.startsWith('$.') ? key.substring(2) : key;
                         messages.forEach(msg => {
                             list.innerHTML += `<li><strong>${cleanKey}:</strong> ${msg}</li>`;
@@ -894,9 +894,9 @@
                     });
                 }
 
-                // Hiçbir şey bulunamadıysa yedek mekanizma
+                // Fallback mechanism if nothing is found
                 if (!list.innerHTML) {
-                    list.innerHTML = `<li>Bilinmeyen bir API hatası oluştu. (Status: ${errorData.status || '???'})</li>`;
+                    list.innerHTML = `<li>An unknown API error occurred. (Status: ${errorData.status || '???'})</li>`;
                 }
             }
 
@@ -1103,13 +1103,13 @@
                         body: JSON.stringify({ id, value })
                     });
                     if (res.ok) {
-                        toast('✅ Değer güncellendi ve consumer\'lara sinyal gönderildi!');
+                        toast('✅ Value updated and signal sent to consumers!');
                         closeModal();
                         loadConfigurations();
                     } else {
                         const err = await res.json();
                         showError(err);
-                        toast('❌ Updateme başarısız', 'error');
+                        toast('❌ Update failed', 'error');
                     }
                 } else {
                     // CREATE
@@ -1132,7 +1132,7 @@
                     } else {
                         const err = await res.json();
                         showError(err);
-                        toast('❌ Createma başarısız', 'error');
+                        toast('❌ Creation failed', 'error');
                     }
                 }
                 checkHealth();
@@ -1209,7 +1209,7 @@
                     method: 'POST', headers: headers()
                 });
                 if (res.ok) {
-                    toast('⏪ Rollback başarılı! Consumer\'lar bilgilendirildi.');
+                    toast('⏪ Rollback successful! Consumers notified.');
                     loadConfigurations();
                     showHistory(configId, document.getElementById('historyTitle').textContent);
                 } else {

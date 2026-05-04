@@ -15,7 +15,7 @@ public class GetConfigurationByIdQueryHandler(IConfigurationRepository repositor
         if (record is null) return null;
 
         if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
-            throw new UnauthorizedAccessException("Güvenlik İhlali: Başka bir servise ait konfigürasyonu okuyamazsınız!");
+            throw new UnauthorizedAccessException("Security Violation: You cannot read configuration belonging to another service!");
         
         return new ConfigurationDto(record.Id, record.Name, record.Type, record.Value, record.ApplicationName, record.Environment, record.IsActive);
     }

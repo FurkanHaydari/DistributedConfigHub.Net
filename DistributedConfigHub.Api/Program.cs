@@ -101,7 +101,7 @@ builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
 var app = builder.Build();
 
-// Veritabanı tablolarını ve seed data'yı oluştur 
+// Create database tables and seed data 
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
@@ -115,7 +115,7 @@ app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 
-// Admin Panel için statik dosya sunumu (wwwroot/index.html)
+// Serve static files for Admin Panel (wwwroot/index.html)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

@@ -27,7 +27,7 @@ public class RollbackConfigurationCommandHandler(
             throw new InvalidOperationException("No previous values found to rollback.");
 
         if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
-            throw new UnauthorizedAccessException($"Güvenlik İhlali: Yetkisiz erişim denemesi!");
+            throw new UnauthorizedAccessException($"Security Violation: Unauthorized access attempt!");
 
         var jsonDoc = JsonDocument.Parse(auditLog.OldValues);
         bool hasChanges = false;
@@ -57,7 +57,7 @@ public class RollbackConfigurationCommandHandler(
 
         if (hasChanges)
         {
-            // Infrastructure katmanına context aktarımı
+            // Pass context to Infrastructure layer
             auditContextAccessor.SetContext("ROLLBACK", $"Reverted from Audit Log ID: {request.AuditLogId}");
             
             await repository.UpdateAsync(record, cancellationToken);

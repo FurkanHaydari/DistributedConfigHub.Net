@@ -15,7 +15,7 @@ public class ServiceHealthController(IConfigSdkService configSdk, ProductDbConte
     [HttpGet]
     public async Task<IActionResult> GetHealth()
     {
-        // 1. Veritabanı Kontrolü
+        // 1. Database Check
         string dbName = "Unknown";
         string dbConnectStatus = "Unknown";
         bool isDbHealthy = false;
@@ -34,14 +34,14 @@ public class ServiceHealthController(IConfigSdkService configSdk, ProductDbConte
             dbConnectStatus = $"Error ❌: {ex.Message}";
         }
 
-        // 2. SDK (Configuration) Kontrolü
+        // 2. SDK (Configuration) Check
         var configs = configSdk.GetAll();
-        bool isSdkHealthy = configs.Any(); // Eğer sözlükte hiç kayıt yoksa SDK ayarları çekememiştir.
+        bool isSdkHealthy = configs.Any(); // If there are no records in the dictionary, SDK failed to fetch settings.
         string sdkStatus = isSdkHealthy 
             ? $"Healthy ✅ ({configs.Count} items loaded)" 
             : "Degraded ❌ (No configurations found in cache)";
 
-        // 3. Genel Sağlık Durumu (İkisi de sağlıklıysa sistem ayaktadır)
+        // 3. Overall Health Status (If both are healthy, system is up)
         var isSystemHealthy = isDbHealthy && isSdkHealthy;
 
         var healthResponse = new
@@ -69,7 +69,7 @@ public class ServiceHealthController(IConfigSdkService configSdk, ProductDbConte
             }
         };
 
-        // Eğer sistem tam sağlıklı değilse 503 Service Unavailable dönüyoruz (Kubernetes gibi sistemler için çok önemlidir)
+        // If system is not fully healthy, return 503 Service Unavailable (Crucial for systems like Kubernetes)
         return isSystemHealthy ? Ok(healthResponse) : StatusCode(503, healthResponse);
     }
 }

@@ -8,9 +8,9 @@ namespace DistributedConfigHub.Client.Services;
 
 public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions options, ILogger<ConfigSdkService> logger) : IConfigSdkService
 {
-    // volatile: Referans değişimi anında tüm thread'ler tarafından görülür (atomic swap)
+    // volatile: Reference change is seen by all threads instantly (atomic swap)
     private volatile ConcurrentDictionary<string, ConfigurationItem> _cache = new();
-    // Aynı anda sadece 1 thread'in işlem yapmasını sağlayan kilit mekanizması
+    // Locking mechanism ensuring only 1 thread processes at a time
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
     
     public string? GetString(string key) => _cache.TryGetValue(key, out var item) ? item.Value : null;
@@ -50,7 +50,7 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
 
     public async Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default)
     {
-        // Eğer kilitliyse, asenkron olarak kilidin açılmasını bekle
+        // If locked, wait asynchronously for the lock to be released
         await _reloadLock.WaitAsync(cancellationToken);
         try
         {
@@ -78,13 +78,13 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
                 if (attempt < 3) await Task.Delay(1000 * attempt, cancellationToken); 
             }
 
-            // 2. Success Case - Geçerli veri gelip gelmediği kontrolü
+            // 2. Success Case - Check if valid data arrived
             if (response != null && response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var items = JsonSerializer.Deserialize<List<ConfigurationItem>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 
-                // LKGC Guard: Boş veri gelirse ve elimizde zaten veri varsa, "Son Bilinen İyi Veriyi" (Last Known Good) koru
+                // LKGC Guard: If empty data arrives and we already have data, preserve the Last Known Good Configuration
                 if (items == null || items.Count == 0)
                 {
                     if (!_cache.IsEmpty)
@@ -97,14 +97,14 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
                 {
                     SwapCache(items);
                     
-                    // Fallback dosyasını sadece API'den başarılı ve dolu veri geldiğinde güncelle
+                    // Only update fallback file when successful and populated data arrives from API
                     await File.WriteAllTextAsync(options.FallbackFilePath, content, cancellationToken);
                     logger.LogInformation("Configurations successfully loaded from API and cached to {FallbackFile}.", options.FallbackFilePath);
                     return;
                 }
             }
             
-            // 3. Failure Case - API başarısız ise hafızadaki veriyi koru veya fallback'e bak
+            // 3. Failure Case - If API fails, preserve data in memory or check fallback
             if (!_cache.IsEmpty)
             {
                 logger.LogWarning("API fetch failed after retries. Keeping the existing memory cache to ensure service continuity. Last error: {Error}", 
@@ -122,7 +122,7 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
         }
         finally
         {
-            // Kilidi serbest bırak
+            // Release the lock
             _reloadLock.Release();
         }
     }
@@ -147,8 +147,8 @@ public class ConfigSdkService(HttpClient httpClient, DistributedConfigOptions op
     }
 
     /// <summary>
-    /// Yeni bir dictionary oluşturup referansı atomik olarak değiştirir.
-    /// Bu sayede okuyucu thread'ler asla boş veya yarım yüklenmiş bir cache görmez.
+    /// Creates a new dictionary and swaps the reference atomically.
+    /// This ensures reader threads never see an empty or partially loaded cache.
     /// </summary>
     private void SwapCache(List<ConfigurationItem> items)
     {

@@ -17,7 +17,7 @@ public class UpdateConfigurationCommandHandler(
             throw new KeyNotFoundException($"Configuration with Id {request.Id} not found.");
 
         if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
-            throw new UnauthorizedAccessException($"Güvenlik İhlali: Yetkisiz erişim denemesi!");
+            throw new UnauthorizedAccessException($"Security Violation: Unauthorized access attempt!");
         
         record.UpdateValue(request.Value, "admin");
         await repository.UpdateAsync(record, cancellationToken);

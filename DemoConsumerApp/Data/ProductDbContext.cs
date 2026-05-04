@@ -14,13 +14,13 @@ public class ProductDbContext(
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // DatabaseInitializer gibi dışarıdan options zaten yapılandırılmışsa tekrar müdahale etme
+        // Do not intervene if options are already configured externally like DatabaseInitializer
         if (optionsBuilder.IsConfigured) return;
         
-        // 1. ADIM: Dinamik Hub'dan çekmeyi dene
+        // STEP 1: Try fetching from Dynamic Hub
         var connectionString = configSdk.GetString("MainDatabase");
         
-        // 2. ADIM: Eğer Hub boşsa appsettings.json'daki FallbackConnection'ı kullan
+        // STEP 2: If Hub is empty, use FallbackConnection from appsettings.json
         if (string.IsNullOrEmpty(connectionString))
         {
             connectionString = configuration.GetConnectionString("FallbackConnection");

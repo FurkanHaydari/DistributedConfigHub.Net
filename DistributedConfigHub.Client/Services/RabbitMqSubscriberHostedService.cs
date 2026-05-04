@@ -31,8 +31,8 @@ public class RabbitMqSubscriberHostedService(
 
         try
         {
-            // RabbitMQ container'ı Postgres'e göre daha geç ayağa kalktığı için 
-            // "Exponential Backoff" (Kademeli Bekleme) döngüsü kullanıyoruz.
+            // Since the RabbitMQ container boots up later than Postgres 
+            // We use an Exponential Backoff loop.
             int delayMs = 5000;
             
             while (!stoppingToken.IsCancellationRequested)
@@ -40,15 +40,15 @@ public class RabbitMqSubscriberHostedService(
                 try
                 {
                     _connection = await factory.CreateConnectionAsync(stoppingToken);
-                    logger.LogInformation("RabbitMQ bağlantısı başarıyla kuruldu!");
-                    break; // Bağlantı başarılı ise döngüden çık
+                    logger.LogInformation("RabbitMQ connection established successfully!");
+                    break; // Break the loop if connection is successful
                 }
                 catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
                 {
-                    logger.LogWarning("RabbitMQ sunucusuna bağlanılamadı. {Delay} ms sonra tekrar denenecek...", delayMs);
+                    logger.LogWarning("Could not connect to RabbitMQ server. Retrying in {Delay} ms...", delayMs);
                     await Task.Delay(delayMs, stoppingToken);
                     
-                    // Bekleme süresini ikiye katla, ama kalabalık yapmaması için maksimum 60 saniyede bir dene
+                    // Double the wait time, but cap at 60 seconds to avoid flooding
                     delayMs = Math.Min(delayMs * 2, 60000); 
                 }
             }
@@ -70,7 +70,7 @@ public class RabbitMqSubscriberHostedService(
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 
-                // Mesaj formatı: "SERVICE-A|dev" — environment kısmını parse et
+                // Message format: "SERVICE-A|dev" — parse the environment part
                 var parts = message.Split('|');
                 if (parts.Length == 2)
                 {
@@ -87,7 +87,7 @@ public class RabbitMqSubscriberHostedService(
                     options.Environment, message);
                 await configSdkService.ReloadConfigurationsAsync(stoppingToken);
 
-                // Kullanıcı tarafından tanımlanan callback'i çağır (varsa)
+                // Invoke user-defined callback (if any)
                 if (options.OnConfigurationUpdated != null)
                 {
                     await options.OnConfigurationUpdated.Invoke(configSdkService);

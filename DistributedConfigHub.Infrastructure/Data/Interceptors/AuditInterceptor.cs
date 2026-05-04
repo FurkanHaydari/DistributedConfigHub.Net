@@ -85,7 +85,7 @@ public sealed class AuditInterceptor(IAuditContextAccessor auditContextAccessor)
                 if (newValues.Count > 0) auditLog.NewValues = JsonSerializer.Serialize(newValues);
                 if (affectedColumns.Count > 0) auditLog.AffectedColumns = JsonSerializer.Serialize(affectedColumns);
 
-                // Yalnızca anlamlı modifikasyonları kaydet (Modified olup alanı değişmeyenleri es geç)
+                // Only save meaningful modifications (Skip Modified if the field hasn't changed)
                 if (entry.State == EntityState.Modified && affectedColumns.Count == 0) continue;
 
                 auditEntries.Add(auditLog);

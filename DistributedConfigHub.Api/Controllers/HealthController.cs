@@ -17,7 +17,7 @@ public class HealthController(ConfigDbContext dbContext, IConfiguration configur
             Timestamp = DateTimeOffset.UtcNow
         };
 
-        // 1. PostgreSQL Bağlantı Kontrolü
+        // 1. PostgreSQL Connection Check
         try
         {
             await dbContext.Database.ExecuteSqlRawAsync("SELECT 1", cancellationToken);
@@ -28,7 +28,7 @@ public class HealthController(ConfigDbContext dbContext, IConfiguration configur
             result.PostgreSql = new ServiceStatus { IsHealthy = false, Message = ex.Message };
         }
 
-        // 2. RabbitMQ Bağlantı Kontrolü
+        // 2. RabbitMQ Connection Check
         try
         {
             var factory = new ConnectionFactory
@@ -47,7 +47,7 @@ public class HealthController(ConfigDbContext dbContext, IConfiguration configur
             result.RabbitMq = new ServiceStatus { IsHealthy = false, Message = ex.Message };
         }
 
-        // 3. Kayıtlı Servis(Application) Listesi
+        // 3. Registered Service(Application) List
         var allConfigs = await dbContext.Configurations
             .AsNoTracking()
             .Select(c => new { c.ApplicationName, c.Environment, c.IsActive })

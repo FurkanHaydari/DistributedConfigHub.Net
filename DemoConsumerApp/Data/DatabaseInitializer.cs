@@ -11,7 +11,7 @@ public interface IDatabaseInitializer
 
 public class DatabaseInitializer(IConfiguration configuration, ILogger<DatabaseInitializer> logger) : IDatabaseInitializer
 {
-    // Demo senaryosu için iki veritabanı: Hot-swap ile geçiş yapılacak
+    // Two databases for demo scenario: Transition via Hot-swap
     private static readonly string[] TargetDatabases = ["db_alpha", "db_beta"];
 
     public async Task InitializeAsync()
@@ -30,7 +30,7 @@ public class DatabaseInitializer(IConfiguration configuration, ILogger<DatabaseI
                 var builder = new NpgsqlConnectionStringBuilder(baseConnectionString) { Database = dbName };
                 var connString = builder.ToString();
 
-                // 1. ADIM: Veritabanı yoksa PostgreSQL'de yarat
+                // STEP 1: If database does not exist, create it in PostgreSQL
                 await EnsureDatabaseExistsAsync(baseConnectionString, dbName);
 
                 // 2. ADIM: Tablolar + Seed data
@@ -63,16 +63,16 @@ public class DatabaseInitializer(IConfiguration configuration, ILogger<DatabaseI
             [
                 new Product { Name = "Alpha Laptop Pro", Description = "16\" M3 Ultra, 64GB RAM, 2TB SSD", Price = 89999 },
                 new Product { Name = "Alpha Phone X", Description = "6.7\" OLED, 256GB, 5G destekli amiral gemisi", Price = 54999 },
-                new Product { Name = "Alpha Wireless Earbuds", Description = "ANC, 30 saat pil, IPX5 su geçirmez", Price = 4999 },
+                new Product { Name = "Alpha Wireless Earbuds", Description = "ANC, 30h battery, IPX5 waterproof", Price = 4999 },
                 new Product { Name = "Alpha Monitor 4K", Description = "32\" IPS, HDR600, USB-C hub, 120Hz", Price = 24999 },
                 new Product { Name = "Alpha Keyboard MX", Description = "Mekanik, hot-swap switch, RGB backlight", Price = 3499 }
             ],
             "db_beta" =>
             [
-                new Product { Name = "Beta Smartwatch Ultra", Description = "GPS, kalp ritmi, SpO2, 14 gün pil ömrü", Price = 12999 },
-                new Product { Name = "Beta Tablet Air", Description = "11\" Liquid Retina, M2 çip, Apple Pencil uyumlu", Price = 32999 },
-                new Product { Name = "Beta Fitness Band", Description = "AMOLED ekran, uyku takibi, su geçirmez", Price = 2499 },
-                new Product { Name = "Beta Power Bank", Description = "20000mAh, 65W hızlı şarj, USB-C PD", Price = 1999 }
+                new Product { Name = "Beta Smartwatch Ultra", Description = "GPS, heart rate, SpO2, 14-day battery life", Price = 12999 },
+                new Product { Name = "Beta Tablet Air", Description = "11\" Liquid Retina, M2 chip, Apple Pencil compatible", Price = 32999 },
+                new Product { Name = "Beta Fitness Band", Description = "AMOLED display, sleep tracking, waterproof", Price = 2499 },
+                new Product { Name = "Beta Power Bank", Description = "20000mAh, 65W fast charging, USB-C PD", Price = 1999 }
             ],
             _ => Array.Empty<Product>()
         };

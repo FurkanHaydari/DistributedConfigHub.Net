@@ -26,7 +26,7 @@ public class TestController(
 
         var data = new
         {
-            Message = "Demo Consumer App - Güncel Konfigürasyon Bellek Durumu",
+            Message = "Demo Consumer App - Current Configuration Memory Status",
             Timestamp = DateTimeOffset.UtcNow,
             Uptime = uptime.ToString(@"hh\:mm\:ss"),
             StartTime = AppStartTime.ToString("yyyy-MM-dd HH:mm:ss"),

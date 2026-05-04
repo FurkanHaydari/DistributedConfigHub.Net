@@ -396,7 +396,7 @@
         </div>
     </div>
 
-    <!-- System Info Panel — her iki modda da görünür -->
+    <!-- System Info Panel — visible in both modes -->
     <div class="system-panel" id="systemPanel">
         <div class="system-panel-title">
             <div class="dot" id="panelDot"></div>
@@ -459,11 +459,11 @@
                 const maxTx = config.configs.maxConcurrentTransactions || '—';
                 const paymentApi = config.configs.paymentApiUrl || '—';
 
-                // ─── Header güncellemeleri ───
+                // ─── Header updates ───
                 document.getElementById('envBadge').textContent = `ENV: ${envName.toUpperCase()}`;
                 document.getElementById('activeDb').textContent = dbName;
 
-                // ─── System Panel (her zaman güncellenir) ───
+                // ─── System Panel (always updated) ───
                 document.getElementById('panelUptime').textContent = uptime;
                 document.getElementById('panelEnv').textContent = envName.toUpperCase();
                 document.getElementById('panelDb').textContent = dbName;
@@ -489,7 +489,7 @@
                 document.getElementById('statusBadge').className = 'status-badge status-online';
                 document.getElementById('statusBadge').textContent = 'Online';
 
-                // ─── Ürünleri çek ───
+                // ─── Fetch products ───
                 const productsRes = await fetch('/Products');
                 const products = await productsRes.json();
 

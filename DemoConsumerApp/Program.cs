@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Dinamik DbContext ve Initializer kaydı
+// Dynamic DbContext and Initializer registration
 builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
 builder.Services.AddDbContext<ProductDbContext>();
 
@@ -18,7 +18,7 @@ builder.Services.AddDistributedConfigHub(options =>
     builder.Configuration.GetSection("DistributedConfig").Bind(options);
     
     // ASPNETCORE_ENVIRONMENT'tan beslen ve .NET standart env keywordlerini
-    // Config Hub'daki temiz ve framework-agnostic keywordlere dönüştür
+    // Convert to clean and framework-agnostic keywords in Config Hub
     options.Environment = builder.Environment.EnvironmentName switch
     {
         "Development" => "dev",
@@ -30,7 +30,7 @@ builder.Services.AddDistributedConfigHub(options =>
 
 var app = builder.Build();
 
-// SDK konfigürasyon her güncellendiğinde tüm snapshot'ı logla
+// Log entire snapshot every time SDK configuration is updated
 var configOptions = app.Services.GetRequiredService<DistributedConfigOptions>();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 configOptions.OnConfigurationUpdated = sdk =>
@@ -42,7 +42,7 @@ configOptions.OnConfigurationUpdated = sdk =>
     return Task.CompletedTask;
 };
 
-// Sunum için uygulama başlarken her iki veritabanını da hazırla (yarat + seed)
+// For demo purposes, prepare both databases when app starts (create + seed)
 var initializer = app.Services.GetRequiredService<IDatabaseInitializer>();
 await initializer.InitializeAsync();
 

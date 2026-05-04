@@ -18,7 +18,7 @@ public class GetConfigurationHistoryQueryHandler(
         if (record is null) throw new KeyNotFoundException($"Configuration with Id {request.Id} not found.");
 
         if (!string.Equals(record.ApplicationName, request.CallerApplicationName, StringComparison.OrdinalIgnoreCase))
-            throw new UnauthorizedAccessException($"Güvenlik İhlali: '{request.CallerApplicationName}' servisi, '{record.ApplicationName}' servisine ait geçmiş logları okuyamaz!");
+            throw new UnauthorizedAccessException($"Security Violation: Service '{request.CallerApplicationName}' cannot read history logs of service '{record.ApplicationName}'!");
 
         return await auditLogRepository.GetHistoryAsync(request.Id, cancellationToken);
     }

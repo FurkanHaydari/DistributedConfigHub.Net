@@ -20,7 +20,7 @@ public class ConfigurationRecord : BaseAuditableEntity
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("Value cannot be empty.");
 
-        // Nesne yaratılırken kuralı işlet
+        // Execute rule upon object creation
         if (!IsValidValueForType(type, value))
             throw new InvalidOperationException($"The provided value '{value}' is not a valid format for type '{type}'.");
 

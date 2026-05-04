@@ -11,21 +11,21 @@ public class LiveUpdateIntegrationTest(CustomWebApplicationFactory factory) : IC
     {
         var client = factory.CreateAuthenticatedClient();
         
-        // 1. Orijinal ayarları "Prod" ortamı için çek
+        // 1. Fetch original settings for the "Prod" environment
         var getResponse = await client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
         getResponse.EnsureSuccessStatusCode();
 
         var configs = await getResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(factory.DefaultJsonOptions);
         
         Assert.NotNull(configs);
-        Assert.NotEmpty(configs); // Migration seed datasının başarıyla geldiğini doğrular
+        Assert.NotEmpty(configs); // Verifies that Migration seed data arrived successfully
 
-        // MaxConcurrentTransactions prod değerini bul (Seed'deki değeri: 50000)
+        // Find MaxConcurrentTransactions prod value (Value in Seed: 50000)
         var limitConfig = configs.FirstOrDefault(c => c.Name == "MaxConcurrentTransactions");
         Assert.NotNull(limitConfig);
         Assert.Equal("50000", limitConfig.Value);
 
-        // 2. Yeni değeri REST üzerinden PUT ile 99999 yap (Gerçek senaryo - Testcontainer RabbitMQ fırlatılacak)
+        // 2. Update value to 99999 via REST PUT (Real scenario - Testcontainer RabbitMQ will be fired)
         var putPayload = new
         {
             id = limitConfig.Id,
@@ -35,13 +35,13 @@ public class LiveUpdateIntegrationTest(CustomWebApplicationFactory factory) : IC
         var putResponse = await client.PutAsJsonAsync($"/Configurations/{limitConfig.Id}", putPayload);
         Assert.Equal(System.Net.HttpStatusCode.NoContent, putResponse.StatusCode);
 
-        // 3. Gerçekten güncellenmiş mi diye tekrar Testcontainer DB'den taze çek
+        // 3. Fetch fresh data from Testcontainer DB to verify it was actually updated
         var getUpdatedResponse = await client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
         var updatedConfigs = await getUpdatedResponse.Content.ReadFromJsonAsync<List<ConfigurationDto>>(factory.DefaultJsonOptions);
         
         var updatedLimitConfig = updatedConfigs!.First(c => c.Name == "MaxConcurrentTransactions");
         
-        // Assert: 50000 olan limitin başarıyla 99999 olduğunu ve sistemin çökmediğini kanıtla
+        // Assert: Prove that the 50000 limit successfully became 99999 and the system did not crash
         Assert.Equal("99999", updatedLimitConfig.Value);
     }
 }

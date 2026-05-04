@@ -8,7 +8,7 @@ public interface IConfigSdkService
     bool GetBoolean(string key, bool defaultValue = false);
     
     /// <summary>
-    /// Bellekteki tüm konfigürasyonları (Key → Value) döner.
+    /// Returns all configurations in memory (Key -> Value).
     /// </summary>
     IReadOnlyDictionary<string, string> GetAll();
     

@@ -21,38 +21,38 @@ public class CreateConfigurationCommandHandler(
 {
     public async Task<Guid> Handle(CreateConfigurationCommand request, CancellationToken cancellationToken)
     {
-        // 1. Veritabanında (Aktif veya Pasif) böyle bir kayıt var mı:
+        // 1. Does such a record exist in the database (Active or Passive):
         var existingRecord = await repository.GetByNameAsync(request.Name, request.ApplicationName, request.Environment, cancellationToken);
 
         if (existingRecord != null)
         {
             if (existingRecord.IsActive)
             {
-                // Kayıt var ve zaten aktif. Çakışma var (409 Conflict)
+                // Record exists and is already active. Conflict (409 Conflict)
                 throw new InvalidOperationException($"Configuration '{request.Name}' already exists.");
             }
             else
             {
-                // Kayıt var ama pasif (Soft-deleted)
-                // Tipini (Type) değiştirmeye çalışıyorsa izin verilmesin, çünkü eski loglar ve Consumer'lar patlayabilir.
+                // Record exists but is passive (Soft-deleted)
+                // Do not allow changing the Type, because old logs and Consumers might crash.
                 if (existingRecord.Type != request.Type)
                     throw new InvalidOperationException($"A deleted configuration exists but with type '{existingRecord.Type}'. You cannot change the type of a restored configuration.");
 
-                // Unique Index (DbUpdateException) hatasını önlemek ve Audit Log zincirini koparmamak için
-                // yeni bir satır eklemek yerine eski silinmiş kaydı diriltip (Restore) güncelliyoruz.
+                // To prevent Unique Index (DbUpdateException) error and keep the Audit Log chain intact
+                // instead of adding a new row, we resurrect (Restore) the old soft-deleted record and update it.
                 existingRecord.Activate("admin");
                 existingRecord.UpdateValue(request.Value, "admin");
                 
                 await repository.UpdateAsync(existingRecord, cancellationToken);
                 
-                // Event'i fırlat
+                // Dispatch Event
                 await messagePublisher.PublishConfigurationUpdatedEventAsync(existingRecord.ApplicationName, existingRecord.Environment, cancellationToken);
                 
                 return existingRecord.Id;
             }
         }
 
-        // 2. Kayıt hiç yoksa sıfırdan yarat
+        // 2. If the record does not exist at all, create it from scratch
         var newRecord = new ConfigurationRecord(
             request.Name, 
             request.Type, 

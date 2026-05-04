@@ -12,10 +12,10 @@ public class SecurityAndResilienceIntegrationTest(CustomWebApplicationFactory fa
     {
         var client = factory.CreateAuthenticatedClient("wrong-key-123");
 
-        // Act: SERVICE-A için yanlış anahtar gönderiyoruz
+        // Act: Send wrong key for SERVICE-A
         var response = await client.GetAsync("/Configurations?applicationName=SERVICE-A&environment=prod");
 
-        // Assert: Attribute'umuz eşleşme olmayınca 401 Unauthorized döner
+        // Assert: Our Attribute returns 401 Unauthorized when there's no match
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
@@ -24,10 +24,10 @@ public class SecurityAndResilienceIntegrationTest(CustomWebApplicationFactory fa
     {
         var client = factory.CreateAuthenticatedClient();
 
-        // Act: SERVICE-B bilgilerine erişmeye çalışıyoruz (İzolasyon İhlali Denemesi)
+        // Act: Try to access SERVICE-B details (Isolation Violation Attempt)
         var response = await client.GetAsync("/Configurations?applicationName=SERVICE-B&environment=prod");
 
-        // Assert: 403 Forbidden almalıyız çünkü anahtar SERVICE-B'ye ait değil
+        // Assert: We should get 403 Forbidden because the key does not belong to SERVICE-B
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
