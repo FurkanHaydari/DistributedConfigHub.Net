@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Consumer — Ürün Kataloğu</title>
+    <title>Demo Consumer — Product Catalog</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -372,7 +372,7 @@
         </div>
         <div class="header-right">
             <span id="envBadge" class="env-badge">ENV: —</span>
-            Aktif DB: <span id="activeDb">—</span>
+            Active DB: <span id="activeDb">—</span>
         </div>
     </div>
 
@@ -380,19 +380,19 @@
         <div id="mainContent">
             <div class="loading">
                 <div class="spinner"></div>
-                Yükleniyor...
+                Loading...
             </div>
         </div>
     </div>
 
     <div id="maintenanceOverlay" class="maintenance-overlay" style="display: none;">
         <div class="maintenance-icon">🔧</div>
-        <div class="maintenance-title">Bakım Modu Aktif</div>
+        <div class="maintenance-title">Maintenance Mode Active</div>
         <div class="maintenance-text">
-            Sistem şu anda bakımda. Lütfen kısa bir süre sonra tekrar deneyiniz.
+            The system is currently undergoing maintenance. Please try again shortly.
         </div>
         <div class="maintenance-env" id="maintenanceEnv">
-            Ortam: <span>—</span>
+            Environment: <span>—</span>
         </div>
     </div>
 
@@ -400,7 +400,7 @@
     <div class="system-panel" id="systemPanel">
         <div class="system-panel-title">
             <div class="dot" id="panelDot"></div>
-            SİSTEM BİLGİSİ
+            SYSTEM INFO
         </div>
         <div class="system-row">
             <span class="label">Uptime</span>
@@ -411,11 +411,11 @@
             <span class="value env" id="panelEnv">—</span>
         </div>
         <div class="system-row">
-            <span class="label">Aktif DB</span>
+            <span class="label">Active DB</span>
             <span class="value db" id="panelDb">—</span>
         </div>
         <div class="system-row">
-            <span class="label">Max İşlem</span>
+            <span class="label">Max Tx</span>
             <span class="value" id="panelMaxTx">—</span>
         </div>
         <div class="system-row">
@@ -424,18 +424,18 @@
                 style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">—</span>
         </div>
         <div class="system-row">
-            <span class="label">Bakım Modu</span>
+            <span class="label">Maintenance Mode</span>
             <span class="value" id="panelMaintenance">—</span>
         </div>
     </div>
 
     <div class="footer">
         Powered by <a href="http://localhost:5173" target="_blank">Distributed Config Hub</a>
-        <div class="refresh-note">Sayfa her 3 saniyede otomatik güncellenir</div>
+        <div class="refresh-note">Page auto-refreshes</div>
     </div>
 
     <script>
-        const POLL_INTERVAL = 3000;
+        const POLL_INTERVAL = 1000;
 
         function parseDbName(connStr) {
             if (!connStr || connStr === 'unknown') return 'unknown';
@@ -470,7 +470,7 @@
                 document.getElementById('panelMaxTx').textContent = `${maxTx}/dk`;
                 document.getElementById('panelPayment').textContent = paymentApi;
                 document.getElementById('panelPayment').title = paymentApi;
-                document.getElementById('panelMaintenance').textContent = isMaintenance ? 'AKTİF' : 'Kapalı';
+                document.getElementById('panelMaintenance').textContent = isMaintenance ? 'ACTIVE' : 'Disabled';
                 document.getElementById('panelMaintenance').className = isMaintenance ? 'value warn' : 'value';
 
                 // Dot rengi
@@ -479,9 +479,9 @@
                 // ─── Maintenance mode ───
                 if (isMaintenance) {
                     document.getElementById('maintenanceOverlay').style.display = 'flex';
-                    document.getElementById('maintenanceEnv').innerHTML = `Ortam: <span>${envName.toUpperCase()}</span> · DB: <span>${dbName}</span>`;
+                    document.getElementById('maintenanceEnv').innerHTML = `Environment: <span>${envName.toUpperCase()}</span> · DB: <span>${dbName}</span>`;
                     document.getElementById('statusBadge').className = 'status-badge status-maintenance';
-                    document.getElementById('statusBadge').textContent = 'Bakımda';
+                    document.getElementById('statusBadge').textContent = 'Under Maintenance';
                     return;
                 }
 
@@ -495,7 +495,7 @@
 
                 if (products.length === 0) {
                     document.getElementById('mainContent').innerHTML = `
-                    <div class="loading">Henüz ürün bulunmuyor.</div>
+                    <div class="loading">No products available yet.</div>
                 `;
                     return;
                 }
@@ -517,7 +517,7 @@
             } catch (err) {
                 document.getElementById('mainContent').innerHTML = `
                 <div class="loading" style="color: #ef4444;">
-                    ⚠️ API'ye bağlanılamadı: ${err.message}
+                    ⚠️ Failed to connect to API: ${err.message}
                 </div>
             `;
             }
